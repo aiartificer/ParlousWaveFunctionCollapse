@@ -1,0 +1,1 @@
+g++ -Iinclude -I../lua-5.1.5/src -I ParlousWaveFunctionCollapse/include -L../lua-5.1.5/src -L ParlousWaveFunctionCollapse/lib/linux  ParlousWaveFunctionCollapse/src/parlous_array.cpp test/test.cpp ParlousWaveFunctionCollapse/src/parlous_wfc.cpp -O -Wall -o parlous_wfc -llua
