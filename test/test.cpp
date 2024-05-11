@@ -3,7 +3,6 @@
 #include <cassert>
 #include <cstdlib>
 #include <time.h>
-#include "parlous_array.h"
 #include "parlous_wfc.h"
 extern "C"{
     #include <lua.h>    
@@ -28,7 +27,7 @@ void test_from_lua_script()
     // lua_setglobal(L, "get");
     // lua_pushcfunction(L, put_int);
     // lua_setglobal(L, "put");
-    LuaInitPArray(L);
+    // LuaInitPArray(L);
     LuaInitHexMap(L);
 
     // Run the Lua script

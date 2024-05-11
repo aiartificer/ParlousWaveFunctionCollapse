@@ -20,6 +20,35 @@ extern "C"{
 ////////////////////////////////////////
 ////////// Static Functions ////////////
 ////////////////////////////////////////
+template <typename T>
+static int pprintMap(lua_State* L)
+{
+    lua_Integer length = lua_tointeger(L, lua_upvalueindex(1));
+    lua_Integer width = lua_tointeger(L, lua_upvalueindex(2));
+    T *hexMap = (T *)lua_touserdata(L, -1);
+    const lua_Integer rows = length/width;
+    for (lua_Integer i = 0; i < rows; i++) {
+        if (i < 10 && i%2 == 0) printf("map[%lu][:]:  ", i);
+        else if (i < 10 && i%2 == 1) printf("map[%lu][:]: ", i);
+        else if (i%2 == 0) printf("map[%lu][:]: ", i);
+        else printf("map[%lu][:]:", i);
+        for (lua_Integer j = 0; j < width; j++)
+        {
+            lua_Integer v = hexMap[j + width*i];
+            printf(" %lu", v > 0 ? ~v : 0);
+        }
+        printf("\n");
+    }
+    printf("-----------");
+    for (lua_Integer j = 0; j < width; j++) {
+        printf("--");
+    }
+    printf("\n");
+
+    // Return 0 items
+    return 0;
+}
+
 static int len(lua_State* L)                      //// [-0, +1, m]
 {
     // Collect len and put on stack
@@ -121,6 +150,8 @@ static int len_factory(lua_State* L,              //// [-0, +1, m]
                        lua_Integer length,
                        lua_Integer type_size,
                        lua_Integer width,
+                       lua_Integer maxDepth,
+                       lua_Integer prime,
                        lua_CFunction fn)
 {
 
@@ -128,7 +159,9 @@ static int len_factory(lua_State* L,              //// [-0, +1, m]
     lua_pushinteger(L, length);                     // [-0, +1, -]
     lua_pushinteger(L, type_size);                  // [-0, +1, -]
     lua_pushinteger(L, width);                      // [-0, +1, -]
-    lua_pushcclosure(L, fn, 3);                     // [-3, +1, -]
+    lua_pushinteger(L, maxDepth);                   // [-0, +1, -]
+    lua_pushinteger(L, prime);                      // [-0, +1, -]
+    lua_pushcclosure(L, fn, 5);                     // [-5, +1, -]
     
     // Return 1 item
     return 1;
