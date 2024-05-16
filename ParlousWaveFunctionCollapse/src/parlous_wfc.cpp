@@ -39,19 +39,15 @@ int __updateDomainCall(lua_State* L,
     // lua_pushvalue(L, -1);                       // [-0, +1, -]
 
     // Check function on stack and copy it to top of stack
-    printf(">-----<!!!>-----<\n");  // ### DEBUG
     luaL_checktype(L, -1, LUA_TFUNCTION);
     lua_pushvalue(L, -1);                           // [-0, +1, -]
 
     // Call the function
-    printf(">-----<A>-----<\n");  // ### DEBUG
     lua_pushinteger(L, l);                          // [-0, +1, -]
     lua_pushnumber(L, (T)hexMap[l]);                // [-0, +1, -]
     lua_call(L, 2, 1);                              // [-3, +0, e]
-    printf(">-----<B>-----<\n");  // ### DEBUG
     T result = (T)luaL_checknumber(L, -1);
     hexMap[l] = result;
-    printf("~~> \"%lu\"\n", result); // ### DEBUG
     lua_pop(L, 1);                                  // [-1, +0, -]
 
     return 0;
@@ -66,25 +62,22 @@ int updateDomainAtPoint(lua_State* L,
                         bool newWave)
 {
     // Skip when on map edge or when point is already determined
-    printf(">-----<!!!!!>-----<\n");  // ### DEBUG
     luaL_checktype(L, -1, LUA_TFUNCTION);
     if (l >= length) return 0;
     if (hexMap[l] > 0 && __countBits(~hexMap[l]) == 1) return 0;
     lua_Integer height = length/width;
-    printf(">--------------------<\n");  // ### DEBUG
-    printf("### (x=%lu, y=%lu)\n", l%height, l/height); // ### DEBUG
-    printf("### [%i, %i, %i, %i]\n", l%height < REGION_SIZE/2, l%height >= width - REGION_SIZE/2, l/height < REGION_SIZE/2, l/height >= height - REGION_SIZE/2); // ### DEBUG
-    if (l%height < REGION_SIZE/2 || l%height >= width - REGION_SIZE/2) return 0;
-    if (l/height < REGION_SIZE/2 || l/height >= height - REGION_SIZE/2) return 0;
-    printf(">--------------------<\n");  // ### DEBUG
+    const lua_Integer x = l%width;
+    const lua_Integer y = l/width;
+    if (x < REGION_SIZE/2 || x >= width - REGION_SIZE/2) return 0;
+    if (y < REGION_SIZE/2 || y >= height - REGION_SIZE/2) return 0;
 
     // Loop through adjanceny range around point and apply rules
-    T* adjPoints[REGION_SIZE];
-    adjPoints[0] = &hexMap[l - REGION_SIZE/2 - 2*width + 1];
-    adjPoints[1] = &hexMap[l - REGION_SIZE/2 - width + Y(l, width)%2 == 0 ? 1 : 0];
-    adjPoints[2] = &hexMap[l - REGION_SIZE/2];
-    adjPoints[3] = &hexMap[l - REGION_SIZE/2 + width + Y(l, width)%2 == 0 ? 1 : 0];
-    adjPoints[4] = &hexMap[l - REGION_SIZE/2 + 2*width + 1];
+    // T* adjPoints[REGION_SIZE];
+    // adjPoints[0] = &hexMap[l - REGION_SIZE/2 - 2*width + 1];
+    // adjPoints[1] = &hexMap[l - REGION_SIZE/2 - width + Y(l, width)%2 == 0 ? 1 : 0];
+    // adjPoints[2] = &hexMap[l - REGION_SIZE/2];
+    // adjPoints[3] = &hexMap[l - REGION_SIZE/2 + width + Y(l, width)%2 == 0 ? 1 : 0];
+    // adjPoints[4] = &hexMap[l - REGION_SIZE/2 + 2*width + 1];
 
     // Apply rules
     __updateDomainCall<T>(L, hexMap, l);
@@ -171,7 +164,7 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
     const lua_Integer prime = lua_tointeger(L, lua_upvalueindex(4));
     T *hexMap = (T *)lua_touserdata(L, -2);
     luaL_checktype(L, -1, LUA_TFUNCTION);
-    // lua_pushvalue(L, -1);                           // [-0, +1, -]
+    // lua_pushvalue(L, -1);                        // [-0, +1, -]
     int err = 0;
 
     // Setup loop
@@ -187,24 +180,25 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
         err = updateDomainAtPoint(L, length, width, hexMap, l, true);
         if (err != 0) return err;
 
-        // // Generate list of adjacent points in hex map
-        // lua_Integer buffer_size = 6*(maxDepth*maxDepth + maxDepth)/2;
-        // T *circleBuffer = (T *)lua_newuserdata(L, buffer_size*sizeof(T));
-        // for (lua_Integer r = 1; r <= maxDepth; r++)
-        // {
-        //     err = hexCircle(width, l, r, &circleBuffer[6*(r-1)], buffer_size);
-        //     if (err != 0) return err;
-        // }
+        // Generate list of adjacent points in hex map
+        lua_Integer buffer_size = 6*(maxDepth*maxDepth + maxDepth)/2;
+        T *circleBuffer = (T *)lua_newuserdata(L, buffer_size*sizeof(T));  // [-0, +1, m]
+        for (lua_Integer r = 1; r <= maxDepth; r++)
+        {
+            err = hexCircle(width, l, r, &circleBuffer[6*(r-1)], buffer_size);
+            if (err != 0) return err;
+        }
+        lua_pushvalue(L, -2);                       // [-0, +1, -]
 
-        // // Apply rules to adjacent points
-        // for (lua_Integer al = 0; al < buffer_size; al++)
-        // {
-        //     // err = updateDomainAtPoint(L, length, width, hexMap, circleBuffer[al], false);
-        //     if (err != 0) return err;
-        // }
+        // Apply rules to adjacent points
+        for (lua_Integer al = 0; al < buffer_size; al++)
+        {
+            err = updateDomainAtPoint(L, length, width, hexMap, circleBuffer[al], false);
+            if (err != 0) return err;
+        }
 
         // Copy function to top of stack for next call
-        // lua_pushvalue(L, -1);                       // [-0, +1, -]
+        // lua_pushvalue(L, -1);                    // [-0, +1, -]
     }
 
     // Return 0 items

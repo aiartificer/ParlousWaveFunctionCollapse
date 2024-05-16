@@ -1,7 +1,7 @@
 --local parray = require("ParlousArray/ParlousArray")
 
 function Setup_Hex_Map(length, type_size)
-  local arr = parlous_wfc.new_hex_map(length, type_size, 5, 5, 17)
+  local arr = parlous_wfc.new_hex_map(length, type_size, 10, 5, 17)
   print("-- parlous_wfc -------------------------")
   for k,v in pairs(getmetatable(arr)) do print(k,v) end
   print("----------------------------------------")
@@ -32,10 +32,12 @@ end
 
 function Test_Parlous_WFC_Gen()
   print("\n\nTest_Parlous_WFC_Gen")
-  local hex_map = Setup_Hex_Map(40, 8)
+  local hex_map = Setup_Hex_Map(80, 8)
   hex_map:map(function (i, x) return 0 end)
-  hex_map:gen(function (i, x) return i end)
+  local idx = 0
+  hex_map:gen(function (i, x) idx = idx + 1; return idx end)
   hex_map:pprint()
+  print("idx = "..idx)
 end
 
 print("> Test_Parlous_Wave_Function_Collapse <")

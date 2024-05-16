@@ -35,7 +35,8 @@ static int pprintMap(lua_State* L)
         for (lua_Integer j = 0; j < width; j++)
         {
             lua_Integer v = hexMap[j + width*i];
-            printf(" %lu", v > 0 ? ~v : 0);
+            // printf(" %lu", v > 0 ? ~v : 0);
+            printf(" %lu", v);  // ### DEBUG
         }
         printf("\n");
     }
