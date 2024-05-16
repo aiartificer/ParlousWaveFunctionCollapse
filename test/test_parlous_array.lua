@@ -32,7 +32,7 @@ end
 
 function Test_Parlous_WFC_Gen()
   print("\n\nTest_Parlous_WFC_Gen")
-  local hex_map = Setup_Hex_Map(20, 8)
+  local hex_map = Setup_Hex_Map(40, 8)
   hex_map:map(function (i, x) return 0 end)
   hex_map:gen(function (i, x) return i end)
   hex_map:pprint()
