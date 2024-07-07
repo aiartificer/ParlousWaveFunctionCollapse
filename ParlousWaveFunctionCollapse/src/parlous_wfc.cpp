@@ -10,7 +10,7 @@
 
 
 template <typename T>
-size_t __countBits(T n)
+static size_t __countBits(T n)
 {
     // Brian Kernighan’s Algorithm
     size_t count = 0;
@@ -23,29 +23,52 @@ size_t __countBits(T n)
 }
 
 template <typename T>
-int __updateDomainCall(lua_State* L,
-                       T *hexMap,
-                       lua_Integer l)
+static int genHexMapHelperFunc(lua_State* L)
 {
-    // // Apply rules
-    // lua_pushinteger(L, i);                      // [-0, +1, -]
-    // lua_pushinteger(L, (T)hexMap[i]);           // [-0, +1, -]
-    // lua_call(L, 2, 1);                          // [-3, +1, e]
-    // T result = (T)luaL_checknumber(L, -1);
-    // hexMap[i] = result;
-    // lua_pop(L, 1);                              // [-1, +0, -]
+    // FIXME Segmentation fault somewhere in this trace
+    // printf("-----<A>-----\n"); // ### DEBUG
+    T *hexMap = (T *)lua_touserdata(L, lua_upvalueindex(1));
+    lua_Integer length = lua_tointeger(L, lua_upvalueindex(2));
+    lua_Integer width = lua_tointeger(L, lua_upvalueindex(3));
+    lua_Integer idx = lua_tointeger(L, lua_upvalueindex(4));
+    lua_Integer q = luaL_checkinteger(L, -2);
+    lua_Integer r = luaL_checkinteger(L, -1);
 
-    // // Copy function to top of stack for next call
-    // lua_pushvalue(L, -1);                       // [-0, +1, -]
+    // Convert axial coordinates to array index
+    lua_Integer l = even_axial_to_l(width, q, r);
+    // printf("###> (%lu, %lu) --> idx=%lu, l=%lu\n", q, r, idx, l); // ### DEBUG
+    // printf("###> hexMap[%lu+%lu] = %lu\n", idx, l, hexMap[(idx + l)%length]); // ### DEBUG
+    lua_pushinteger(L, hexMap[(idx + l)%length]);
+    // printf("-----<B>-----\n"); // ### DEBUG
 
+    return 1;
+}
+
+template <typename T>
+static int __updateDomainCall(lua_State* L,
+                              T *hexMap,
+                              lua_Integer length,
+                              lua_Integer width,
+                              lua_Integer l)
+{
     // Check function on stack and copy it to top of stack
     luaL_checktype(L, -1, LUA_TFUNCTION);
     lua_pushvalue(L, -1);                           // [-0, +1, -]
 
-    // Call the function
+    // Add hex map helper function to paramter list
+    lua_pushlightuserdata (L, (void *)hexMap);      // [-0, +1, -]
+    lua_pushinteger(L, length);                     // [-0, +1, -]
+    lua_pushinteger(L, width);                      // [-0, +1, -]
     lua_pushinteger(L, l);                          // [-0, +1, -]
+    lua_pushcclosure(L, genHexMapHelperFunc<T>, 4); // [-4, +1, -]
+
+    // Add remaining parameters
     lua_pushnumber(L, (T)hexMap[l]);                // [-0, +1, -]
-    lua_call(L, 2, 1);                              // [-3, +0, e]
+    
+    // Call the function and apply result to hex map
+    // printf("-----<A>-----\n"); // ### DEBUG
+    lua_call(L, 2, 1);                              // [-3, +1, e]
+    // printf("-----<B>-----\n"); // ### DEBUG
     T result = (T)luaL_checknumber(L, -1);
     hexMap[l] = result;
     lua_pop(L, 1);                                  // [-1, +0, -]
@@ -54,54 +77,39 @@ int __updateDomainCall(lua_State* L,
 }
 
 template <typename T>
-int updateDomainAtPoint(lua_State* L,
-                        lua_Integer length,
-                        lua_Integer width,
-                        T *hexMap,
-                        lua_Integer l,
-                        bool newWave)
+static int updateDomainAtPoint(lua_State* L,
+                               lua_Integer length,
+                               lua_Integer width,
+                               T *hexMap,
+                               lua_Integer l,
+                               bool newWave)
 {
     // Skip when on map edge or when point is already determined
+    // printf("-----<A>-----\n"); // ### DEBUG
     luaL_checktype(L, -1, LUA_TFUNCTION);
-    if (l >= length) return 0;
+    if (l >= length || l < 0) return 0;  // FIXME l < 0!!! Causes segmentation fault
+    // printf("-----<l=%lu < length=%lu>-----\n", l, length); // ### DEBUG  -----<l=10679534639334293764 < length=80>-----
+    if(l < 0) printf("###==> l=%lu", l); // ### DEBUG
     if (hexMap[l] > 0 && __countBits(~hexMap[l]) == 1) return 0;
+    // printf("-----<B>-----\n"); // ### DEBUG
     lua_Integer height = length/width;
     const lua_Integer x = l%width;
     const lua_Integer y = l/width;
     if (x < REGION_SIZE/2 || x >= width - REGION_SIZE/2) return 0;
     if (y < REGION_SIZE/2 || y >= height - REGION_SIZE/2) return 0;
 
-    // Loop through adjanceny range around point and apply rules
-    // T* adjPoints[REGION_SIZE];
-    // adjPoints[0] = &hexMap[l - REGION_SIZE/2 - 2*width + 1];
-    // adjPoints[1] = &hexMap[l - REGION_SIZE/2 - width + Y(l, width)%2 == 0 ? 1 : 0];
-    // adjPoints[2] = &hexMap[l - REGION_SIZE/2];
-    // adjPoints[3] = &hexMap[l - REGION_SIZE/2 + width + Y(l, width)%2 == 0 ? 1 : 0];
-    // adjPoints[4] = &hexMap[l - REGION_SIZE/2 + 2*width + 1];
-
     // Apply rules
-    __updateDomainCall<T>(L, hexMap, l);
-
-    // for (uint_fast16_t k = 0; k < rules.len; k++)
-    // {
-        // // Verify rule exists
-        // if ((rules.rule)[k] == NULL) return 2;
-
-        // // Apply rule
-        // hexMap[l] = (rules.rule)[k](adjPoints, hexMap[l],
-        //                              newWave ? 0 : __countBits(~hexMap[l]),
-        //                              rules.index, rules.prime);
-    // }
+    __updateDomainCall<T>(L, hexMap, length, width, l);
 
     return 0;
 }
 
 template <typename T>
-int hexCircle(lua_Integer width,
-              lua_Integer l,
-              size_t r,
-              T *circle,
-              size_t hexCircleLen)
+static int hexCircle(lua_Integer width,
+                     lua_Integer l,
+                     size_t r,
+                     T *circle,
+                     size_t hexCircleLen)
 {
     if (hexCircleLen < 6*r) return 1;
 
@@ -172,6 +180,7 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
     {
         // Periodically (yet unsynchronized) select cell on map
         lua_Integer l = fmod((prime*i), length);
+        // printf("###--> l=%lu, l < 0: %s\n", l, l < 0 ? "true" : "false"); // ### DEBUG
 
         // Check if cell has already completely collapsed the wave
         if (hexMap[l] > 0 && __countBits(~hexMap[l]) == 1) continue;
@@ -193,12 +202,11 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
         // Apply rules to adjacent points
         for (lua_Integer al = 0; al < buffer_size; al++)
         {
+            // printf("-----<gen:A>-----\n"); // ### DEBUG  --<Seg Fault below>--
             err = updateDomainAtPoint(L, length, width, hexMap, circleBuffer[al], false);
+            // printf("-----<gen:B>-----\n"); // ### DEBUG
             if (err != 0) return err;
         }
-
-        // Copy function to top of stack for next call
-        // lua_pushvalue(L, -1);                    // [-0, +1, -]
     }
 
     // Return 0 items
@@ -274,6 +282,7 @@ static int wfc__index_call(lua_State* L)          //// [-0, +1, m]
     return 1;
 }
 
+// Top of stack must be userdata metatable will be applied to
 template <typename T>
 static void wfc__defineMetatable(lua_State* L,    //// [-0, +0, m]
                                  lua_Integer length,
