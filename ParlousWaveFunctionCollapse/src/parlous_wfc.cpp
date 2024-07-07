@@ -217,15 +217,17 @@ template <typename T>
 static int wfc__call(lua_State* L)                //// [-?, +1, m]
 {
     lua_Integer width = lua_tointeger(L, lua_upvalueindex(3));
-    lua_Integer length = luaL_checkinteger(L, -1);
+    lua_Integer l = luaL_checkinteger(L, -1);
     int numArgs = lua_gettop(L);
-    lua_Integer row = 0;
-    if(numArgs >= 2 && length < width)
+
+    // Check if using axial coordinates
+    lua_Integer q = 0;
+    if(numArgs == 2)
     {
-        row = luaL_checkinteger(L, -2);
-        length = width*row + length;
+        q = luaL_checkinteger(L, -2);
+        l = even_axial_to_l(width, q, l);
         lua_pop(L, 2);                              // [-2, +0, -]
-        lua_pushinteger(L, length);                 // [-0, +1, -]
+        lua_pushinteger(L, l);                      // [-0, +1, -]
     }
 
     // Call __get
