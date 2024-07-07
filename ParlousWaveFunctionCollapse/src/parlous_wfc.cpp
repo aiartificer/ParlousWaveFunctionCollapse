@@ -25,8 +25,6 @@ static size_t __countBits(T n)
 template <typename T>
 static int genHexMapHelperFunc(lua_State* L)
 {
-    // FIXME Segmentation fault somewhere in this trace
-    // printf("-----<A>-----\n"); // ### DEBUG
     T *hexMap = (T *)lua_touserdata(L, lua_upvalueindex(1));
     lua_Integer length = lua_tointeger(L, lua_upvalueindex(2));
     lua_Integer width = lua_tointeger(L, lua_upvalueindex(3));
@@ -36,10 +34,10 @@ static int genHexMapHelperFunc(lua_State* L)
 
     // Convert axial coordinates to array index
     lua_Integer l = even_axial_to_l(width, q, r);
-    // printf("###> (%lu, %lu) --> idx=%lu, l=%lu\n", q, r, idx, l); // ### DEBUG
-    // printf("###> hexMap[%lu+%lu] = %lu\n", idx, l, hexMap[(idx + l)%length]); // ### DEBUG
-    lua_pushinteger(L, hexMap[(idx + l)%length]);
-    // printf("-----<B>-----\n"); // ### DEBUG
+    // TODO Introduce flag for edge overflows
+    if(length <= idx + l || 0 > idx + l)
+        return luaL_error(L, "Index out of bounds: (q=%d, r=%d)", q, r);
+    lua_pushinteger(L, hexMap[idx + l]);
 
     return 1;
 }
@@ -66,9 +64,7 @@ static int __updateDomainCall(lua_State* L,
     lua_pushnumber(L, (T)hexMap[l]);                // [-0, +1, -]
     
     // Call the function and apply result to hex map
-    // printf("-----<A>-----\n"); // ### DEBUG
     lua_call(L, 2, 1);                              // [-3, +1, e]
-    // printf("-----<B>-----\n"); // ### DEBUG
     T result = (T)luaL_checknumber(L, -1);
     hexMap[l] = result;
     lua_pop(L, 1);                                  // [-1, +0, -]
@@ -85,13 +81,13 @@ static int updateDomainAtPoint(lua_State* L,
                                bool newWave)
 {
     // Skip when on map edge or when point is already determined
-    // printf("-----<A>-----\n"); // ### DEBUG
-    luaL_checktype(L, -1, LUA_TFUNCTION);
-    if (l >= length || l < 0) return 0;  // FIXME l < 0!!! Causes segmentation fault
-    // printf("-----<l=%lu < length=%lu>-----\n", l, length); // ### DEBUG  -----<l=10679534639334293764 < length=80>-----
-    if(l < 0) printf("###==> l=%lu", l); // ### DEBUG
+    // TODO Introduce flag for edge overflows
+    if(length <= l || 0 > l)
+        return 0;
     if (hexMap[l] > 0 && __countBits(~hexMap[l]) == 1) return 0;
-    // printf("-----<B>-----\n"); // ### DEBUG
+
+    // Location is good, apply rules
+    luaL_checktype(L, -1, LUA_TFUNCTION);
     lua_Integer height = length/width;
     const lua_Integer x = l%width;
     const lua_Integer y = l/width;
@@ -180,7 +176,6 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
     {
         // Periodically (yet unsynchronized) select cell on map
         lua_Integer l = fmod((prime*i), length);
-        // printf("###--> l=%lu, l < 0: %s\n", l, l < 0 ? "true" : "false"); // ### DEBUG
 
         // Check if cell has already completely collapsed the wave
         if (hexMap[l] > 0 && __countBits(~hexMap[l]) == 1) continue;
@@ -202,9 +197,7 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
         // Apply rules to adjacent points
         for (lua_Integer al = 0; al < buffer_size; al++)
         {
-            // printf("-----<gen:A>-----\n"); // ### DEBUG  --<Seg Fault below>--
             err = updateDomainAtPoint(L, length, width, hexMap, circleBuffer[al], false);
-            // printf("-----<gen:B>-----\n"); // ### DEBUG
             if (err != 0) return err;
         }
     }

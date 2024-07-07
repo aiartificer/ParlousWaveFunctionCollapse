@@ -68,10 +68,7 @@ static int get(lua_State* L)                      //// [-0, +1, m]
     T *arr = (T *)lua_touserdata(L, -2);
     lua_Integer i = luaL_checkinteger(L, -1);
     if(length <= i)
-    {
-        lua_pushstring(L, "Index out of bounds");
-        lua_error(L);
-    }
+        return luaL_error(L, "Index out of bounds");
 
     // Get array at index
     lua_pushnumber(L, (T)arr[i]);                   // [-0, +1, -]

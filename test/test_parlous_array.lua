@@ -36,12 +36,11 @@ function Test_Parlous_WFC_Gen()
   hex_map:map(function (i, x) return 0 end)
   local idx = 0
   hex_map:gen(function (hx, x)
-    -- print("hx(1, 1) = "..hx(1, 1))  -- ### DEBUG
+    print("hx(1, 1) = "..hx(1, 1))  -- ### DEBUG
     idx = idx + 1;
     -- print("idx = "..idx)  -- ### DEBUG
     return idx
   end)
-  print("========================================")  -- ### DEBUG
   hex_map:pprint()
   print("idx = "..idx)
 end
