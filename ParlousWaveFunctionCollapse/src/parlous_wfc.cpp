@@ -10,6 +10,28 @@
 
 
 template <typename T>
+static int bitMask(lua_State* L)                    //// [-0, +1, m]
+{
+    lua_Integer mask = luaL_checkinteger(L, -2);
+    lua_Integer v = luaL_checkinteger(L, -1);
+    lua_pushinteger(L,                              // [-0, +1, -]
+                    mask&v);
+
+    return 1;
+}
+
+template <typename T>
+static int v_dist(lua_State* L)                   //// [-0, +1, m]
+{
+    lua_Integer q = luaL_checkinteger(L, -2);
+    lua_Integer r = luaL_checkinteger(L, -1);
+    lua_pushinteger(L,                              // [-0, +1, -]
+                    (abs(q) + abs(q + r) + abs(r))/2);
+
+    return 1;
+}
+
+template <typename T>
 static size_t __countBits(T n)
 {
     // Brian Kernighan’s Algorithm
@@ -37,7 +59,7 @@ static int genHexMapHelperFunc(lua_State* L)
     // TODO Introduce flag for edge overflows
     if(length <= idx + l || 0 > idx + l)
         return luaL_error(L, "Index out of bounds: (q=%d, r=%d)", q, r);
-    lua_pushinteger(L, hexMap[idx + l]);
+    lua_pushinteger(L, hexMap[idx + l]);            // [-0, +1, -]
 
     return 1;
 }
@@ -60,11 +82,14 @@ static int __updateDomainCall(lua_State* L,
     lua_pushinteger(L, l);                          // [-0, +1, -]
     lua_pushcclosure(L, genHexMapHelperFunc<T>, 4); // [-4, +1, -]
 
-    // Add remaining parameters
+    // Add value at present point as parameter
     lua_pushnumber(L, (T)hexMap[l]);                // [-0, +1, -]
+
+    // Add function to measure distance from present point
+    lua_pushcclosure(L, bitMask<T>, 0);             // [-0, +1, -]
     
     // Call the function and apply result to hex map
-    lua_call(L, 2, 1);                              // [-3, +1, e]
+    lua_call(L, 3, 1);                              // [-3, +1, e]
     T result = (T)luaL_checknumber(L, -1);
     hexMap[l] = result;
     lua_pop(L, 1);                                  // [-1, +0, -]
@@ -265,6 +290,11 @@ static int wfc__index_call(lua_State* L)          //// [-0, +1, m]
             lua_pushinteger(L, length);             // [-0, +1, -]
             lua_pushinteger(L, width);              // [-0, +1, -]
             lua_pushcclosure(L, pprintMap<T>, 2);   // [-2, +1, -]
+            return 1;
+        }
+        else if (strcmp("dist", f) == 0)
+        {
+            lua_pushcclosure(L, v_dist<T>, 0);      // [-2, +1, -]
             return 1;
         }
         else

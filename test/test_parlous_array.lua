@@ -35,8 +35,9 @@ function Test_Parlous_WFC_Gen()
   local hex_map = Setup_Hex_Map(80, 8)
   hex_map:map(function (i, x) return 0 end)
   local idx = 0
-  hex_map:gen(function (hx, x)
-    print("hx(1, 1) = "..hx(1, 1))  -- ### DEBUG
+  hex_map:gen(function (hx, x, mask)
+    print("hx(1, 1) = "..hx(1, 1).."\tdist(1, 1) = "..hex_map:dist(1, 1))  -- ### DEBUG
+    print("### mask: "..mask(5, hx(1, 1)))  -- ### DEBUG
     idx = idx + 1;
     -- print("idx = "..idx)  -- ### DEBUG
     return idx
