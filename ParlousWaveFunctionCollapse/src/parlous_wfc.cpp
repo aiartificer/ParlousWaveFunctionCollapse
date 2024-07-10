@@ -21,7 +21,22 @@ static int bitMask(lua_State* L)                    //// [-0, +1, m]
 }
 
 template <typename T>
-static int v_dist(lua_State* L)                   //// [-0, +1, m]
+static int v_rel_dist(lua_State* L)               //// [-0, +1, m]
+{
+    lua_Integer c = lua_tointeger(L, lua_upvalueindex(1));
+    lua_Integer l = lua_tointeger(L, lua_upvalueindex(2));
+    lua_Integer q = luaL_checkinteger(L, -2);
+    lua_Integer r = luaL_checkinteger(L, -1);
+    lua_pushinteger(L,                              // [-0, +1, -]
+                    (abs(q - X(l,c)) + \
+                     abs(q + r - X(l,c) - Y(l,c)) + \
+                     abs(r - Y(l,c)))/2);
+
+    return 1;
+}
+
+template <typename T>
+static int v_abs_dist(lua_State* L)               //// [-0, +1, m]
 {
     lua_Integer q = luaL_checkinteger(L, -2);
     lua_Integer r = luaL_checkinteger(L, -1);
@@ -86,7 +101,10 @@ static int __updateDomainCall(lua_State* L,
     lua_pushnumber(L, (T)hexMap[l]);                // [-0, +1, -]
 
     // Add function to measure distance from present point
-    lua_pushcclosure(L, bitMask<T>, 0);             // [-0, +1, -]
+    lua_pushinteger(L, width);                      // [-0, +1, -]
+    lua_pushinteger(L, l);                          // [-0, +1, -]
+    lua_pushcclosure(L, v_rel_dist<T>, 2);             // [-2, +1, -]
+    // lua_pushcclosure(L, bitMask<T>, 2);             // [-2, +1, -]
     
     // Call the function and apply result to hex map
     lua_call(L, 3, 1);                              // [-3, +1, e]
@@ -294,7 +312,12 @@ static int wfc__index_call(lua_State* L)          //// [-0, +1, m]
         }
         else if (strcmp("dist", f) == 0)
         {
-            lua_pushcclosure(L, v_dist<T>, 0);      // [-2, +1, -]
+            lua_pushcclosure(L, v_abs_dist<T>, 0);  // [-0, +1, -]
+            return 1;
+        }
+        else if (strcmp("mask", f) == 0)
+        {
+            lua_pushcclosure(L, bitMask<T>, 0);     // [-0, +1, -]
             return 1;
         }
         else
