@@ -68,13 +68,16 @@ static int genHexMapHelperFunc(lua_State* L)
     lua_Integer idx = lua_tointeger(L, lua_upvalueindex(4));
     lua_Integer q = luaL_checkinteger(L, -2);
     lua_Integer r = luaL_checkinteger(L, -1);
+    lua_Integer _r = Y(idx, width);
+    lua_Integer _q = X(idx, width) - (_r + (_r&1))/2;
 
     // Convert axial coordinates to array index
-    lua_Integer l = even_axial_to_l(width, q, r);
+    lua_Integer l = even_axial_to_l(width, _q+q, _r+r);
     // TODO Introduce flag for edge overflows
-    if(length <= idx + l || 0 > idx + l)
+    // printf("### idx = %ld\t(%ld, y=%ld)->(%ld, r=%ld)\tl = %ld\twidth =  %ld\tv = %ld\n", idx, _q, _r, q, r, l, width, hexMap[idx + l]); // ### DEBUG
+    if(length <= l || 0 > l)
         return luaL_error(L, "Index out of bounds: (q=%d, r=%d)", q, r);
-    lua_pushinteger(L, ~hexMap[idx + l]);            // [-0, +1, -]
+    lua_pushinteger(L, ~hexMap[l]);            // [-0, +1, -]
 
     return 1;
 }

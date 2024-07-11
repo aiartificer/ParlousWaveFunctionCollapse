@@ -38,6 +38,7 @@ function Test_Parlous_WFC_Gen()
   hex_map:gen(function (hx, x, newWave, dist)
     -- print("### ["..calls.."]: "..tostring(newWave))  -- ### DEBUG
     -- print("### ["..calls.."]:\tx = "..x)  -- ### DEBUG
+    -- hx(0,1)  -- ### DEBUG
     calls = calls + 1;
     if (newWave) then return 2^0 end
     if hex_map:mask(1, hx(0, -1)) == 1 then return 2^1 end

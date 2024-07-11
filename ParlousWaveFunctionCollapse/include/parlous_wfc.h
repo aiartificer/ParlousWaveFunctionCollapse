@@ -20,7 +20,7 @@ extern "C"{
 #define row(l,c) (l/c)
 #define X(l,c) (l%c)
 #define col(l,c) (l%c)
-#define even_axial_to_l(w, q, r) (q + (r + (r&1))/2 + w*r)
+#define even_axial_to_l(w, q, r) (q + (r + ((r)&1))/2 + (w)*(r))
 
 
 void LuaInitHexMap(lua_State* L);
