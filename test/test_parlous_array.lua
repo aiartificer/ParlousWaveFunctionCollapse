@@ -34,17 +34,18 @@ function Test_Parlous_WFC_Gen()
   print("\n\nTest_Parlous_WFC_Gen")
   local hex_map = Setup_Hex_Map(80, 8)
   hex_map:map(function (i, x) return 0 end)
-  local idx = 0
-  hex_map:gen(function (hx, x, dist)
-    print("hx(1, 1) = "..hx(1, 1).."\tdist(1, 1) = "..hex_map:dist(1, 1))  -- ### DEBUG
-    print("### rel_dist: "..dist(5, 6))  -- ### DEBUG
-    print("### mask: "..hex_map:mask(5, hx(1, 1)))  -- ### DEBUG
-    idx = idx + 1;
-    -- print("idx = "..idx)  -- ### DEBUG
-    return idx
+  local calls = 0
+  hex_map:gen(function (hx, x, newWave, dist)
+    -- print("### ["..calls.."]: "..tostring(newWave))  -- ### DEBUG
+    -- print("### ["..calls.."]:\tx = "..x)  -- ### DEBUG
+    calls = calls + 1;
+    if (newWave) then return 2^0 end
+    if hex_map:mask(1, hx(0, -1)) == 1 then return 2^1 end
+    if hex_map:mask(2, hx(0, 1)) == 1 then return 2^2 end
+    return 2^3
   end)
   hex_map:pprint()
-  print("idx = "..idx)
+  print("Number of calls to gen: "..calls)
 end
 
 print("> Test_Parlous_Wave_Function_Collapse <")

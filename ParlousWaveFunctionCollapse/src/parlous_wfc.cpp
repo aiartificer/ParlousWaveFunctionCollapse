@@ -10,7 +10,7 @@
 
 
 template <typename T>
-static int bitMask(lua_State* L)                    //// [-0, +1, m]
+static int bitMask(lua_State* L)                  //// [-0, +1, m]
 {
     lua_Integer mask = luaL_checkinteger(L, -2);
     lua_Integer v = luaL_checkinteger(L, -1);
@@ -74,17 +74,18 @@ static int genHexMapHelperFunc(lua_State* L)
     // TODO Introduce flag for edge overflows
     if(length <= idx + l || 0 > idx + l)
         return luaL_error(L, "Index out of bounds: (q=%d, r=%d)", q, r);
-    lua_pushinteger(L, hexMap[idx + l]);            // [-0, +1, -]
+    lua_pushinteger(L, ~hexMap[idx + l]);            // [-0, +1, -]
 
     return 1;
 }
 
 template <typename T>
-static int __updateDomainCall(lua_State* L,
+static int __updateDomainCall(lua_State* L,       //// [-0, +0, m]
                               T *hexMap,
                               lua_Integer length,
                               lua_Integer width,
-                              lua_Integer l)
+                              lua_Integer l,
+                              bool newWave)
 {
     // Check function on stack and copy it to top of stack
     luaL_checktype(L, -1, LUA_TFUNCTION);
@@ -98,18 +99,21 @@ static int __updateDomainCall(lua_State* L,
     lua_pushcclosure(L, genHexMapHelperFunc<T>, 4); // [-4, +1, -]
 
     // Add value at present point as parameter
-    lua_pushnumber(L, (T)hexMap[l]);                // [-0, +1, -]
+    lua_pushnumber(L, ~(T)hexMap[l]);               // [-0, +1, -]
+
+    // Add new wave flag parameter
+    lua_pushboolean(L, newWave);                    // [-0, +1, -]
 
     // Add function to measure distance from present point
     lua_pushinteger(L, width);                      // [-0, +1, -]
     lua_pushinteger(L, l);                          // [-0, +1, -]
-    lua_pushcclosure(L, v_rel_dist<T>, 2);             // [-2, +1, -]
-    // lua_pushcclosure(L, bitMask<T>, 2);             // [-2, +1, -]
+    lua_pushcclosure(L, v_rel_dist<T>, 2);          // [-2, +1, -]
     
     // Call the function and apply result to hex map
-    lua_call(L, 3, 1);                              // [-3, +1, e]
+    lua_call(L, 4, 1);                              // [-5, +1, e]
     T result = (T)luaL_checknumber(L, -1);
-    hexMap[l] = result;
+    // printf("### l = %ld\n", l); // ### DEBUG
+    hexMap[l] = ~result;
     lua_pop(L, 1);                                  // [-1, +0, -]
 
     return 0;
@@ -127,7 +131,7 @@ static int updateDomainAtPoint(lua_State* L,
     // TODO Introduce flag for edge overflows
     if(length <= l || 0 > l)
         return 0;
-    if (hexMap[l] > 0 && __countBits(~hexMap[l]) == 1) return 0;
+    if (hexMap[l] != 0 && __countBits(~hexMap[l]) == 1) return 0;
 
     // Location is good, apply rules
     luaL_checktype(L, -1, LUA_TFUNCTION);
@@ -138,19 +142,21 @@ static int updateDomainAtPoint(lua_State* L,
     if (y < REGION_SIZE/2 || y >= height - REGION_SIZE/2) return 0;
 
     // Apply rules
-    __updateDomainCall<T>(L, hexMap, length, width, l);
+    __updateDomainCall<T>(L, hexMap, length, width, l, newWave);
 
     return 0;
 }
 
 template <typename T>
-static int hexCircle(lua_Integer width,
+static int hexCircle(lua_State* L,
+                     lua_Integer width,
                      lua_Integer l,
                      size_t r,
                      T *circle,
                      size_t hexCircleLen)
 {
-    if (hexCircleLen < 6*r) return 1;
+    if (hexCircleLen < 6*r)
+        return luaL_error(L, "Size allocated for hexCircle too small: need=%d, allocated=%d)", 6*r, hexCircleLen);\
 
     // Start directly left of point
     size_t i = 0;
@@ -212,7 +218,12 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
     T *hexMap = (T *)lua_touserdata(L, -2);
     luaL_checktype(L, -1, LUA_TFUNCTION);
     // lua_pushvalue(L, -1);                        // [-0, +1, -]
-    int err = 0;
+
+    // Allocate reusable circle buffer
+    // printf("### -----<>-----\n"); // ### DEBUG   vvv ?MEMORY ERROR BELOW? vvv
+    lua_Integer buffer_size = 6*(maxDepth*maxDepth + maxDepth)/2;
+    T *circleBuffer = (T *)lua_newuserdata(L, buffer_size*sizeof(T));  // [-0, +1, m]
+    lua_pushvalue(L, -2);                       // [-0, +1, -]
 
     // Setup loop
     for (lua_Integer i = 0; i < length; i++)
@@ -221,29 +232,23 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
         lua_Integer l = fmod((prime*i), length);
 
         // Check if cell has already completely collapsed the wave
-        if (hexMap[l] > 0 && __countBits(~hexMap[l]) == 1) continue;
+        if (hexMap[l] != 0 && __countBits(~hexMap[l]) == 1) continue;
         
         // Update domain at present point
-        err = updateDomainAtPoint(L, length, width, hexMap, l, true);
-        if (err != 0) return err;
+        updateDomainAtPoint(L, length, width, hexMap, l, true);
 
         // Generate list of adjacent points in hex map
-        lua_Integer buffer_size = 6*(maxDepth*maxDepth + maxDepth)/2;
-        T *circleBuffer = (T *)lua_newuserdata(L, buffer_size*sizeof(T));  // [-0, +1, m]
         for (lua_Integer r = 1; r <= maxDepth; r++)
-        {
-            err = hexCircle(width, l, r, &circleBuffer[6*(r-1)], buffer_size);
-            if (err != 0) return err;
-        }
-        lua_pushvalue(L, -2);                       // [-0, +1, -]
+            hexCircle(L, width, l, r, &circleBuffer[6*(r-1)], buffer_size);
 
         // Apply rules to adjacent points
         for (lua_Integer al = 0; al < buffer_size; al++)
         {
-            err = updateDomainAtPoint(L, length, width, hexMap, circleBuffer[al], false);
-            if (err != 0) return err;
+            // printf("### [%ld]:  circleBuffer[%ld] = %ld\n", i, al, circleBuffer[al]);  // ### DEBUG
+            updateDomainAtPoint(L, length, width, hexMap, circleBuffer[al], false);
         }
     }
+    lua_pop(L, 2);                                  // [-2, +0, -]
 
     // Return 0 items
     return 0;
