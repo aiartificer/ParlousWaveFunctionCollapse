@@ -60,6 +60,36 @@ static size_t __countBits(T n)
 }
 
 template <typename T>
+static int bitCount(lua_State* L)                 //// [-0, +1, m]
+{
+    T *hexMap = (T *)lua_touserdata(L, -2);
+    lua_Integer l = luaL_checkinteger(L, -1);
+    lua_pushinteger(L,                              // [-0, +1, -]
+                    __countBits(hexMap[l]));
+
+    return 1;
+}
+
+template <typename T>
+static int bitVal(lua_State* L)                   //// [-0, +1, m]
+{
+    T *hexMap = (T *)lua_touserdata(L, -2);
+    lua_Integer l = luaL_checkinteger(L, -1);
+    lua_Integer v = hexMap[l];
+    lua_Integer i = 0;
+    while (v)
+    {
+        i++;
+        if (v & 1)
+            break;
+        v >>= 1;
+    }
+    lua_pushinteger(L, i);                          // [-0, +1, -]
+
+    return 1;
+}
+
+template <typename T>
 static int genHexMapHelperFunc(lua_State* L)
 {
     T *hexMap = (T *)lua_touserdata(L, lua_upvalueindex(1));
@@ -238,6 +268,7 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
         if (hexMap[l] != 0 && __countBits(~hexMap[l]) == 1) continue;
         
         // Update domain at present point
+        printf("### l = %ld, ", l); // ### DEBUG
         updateDomainAtPoint(L, length, width, hexMap, l, true);
 
         // Generate list of adjacent points in hex map
@@ -328,11 +359,21 @@ static int wfc__index_call(lua_State* L)          //// [-0, +1, m]
             lua_pushcclosure(L, bitMask<T>, 0);     // [-0, +1, -]
             return 1;
         }
+        else if (strcmp("bit_count", f) == 0)
+        {
+            lua_pushcclosure(L, bitCount<T>, 0);     // [-0, +1, -]
+            return 1;
+        }
+        else if (strcmp("bit", f) == 0)
+        {
+            lua_pushcclosure(L, bitVal<T>, 0);     // [-0, +1, -]
+            return 1;
+        }
         else
             return luaL_error(L, "Invalid key");
     }
     else if(LUA_TNUMBER == lua_type(L, -1))
-        return get<T>(L);                           // [-0, +1, m]
+        return get<T>(L);                          // [-0, +1, m]
     
     // Return 1 item
     return 1;
