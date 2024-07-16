@@ -268,7 +268,7 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
         if (hexMap[l] != 0 && __countBits(~hexMap[l]) == 1) continue;
         
         // Update domain at present point
-        printf("### l = %ld, ", l); // ### DEBUG
+        // printf("### l = %ld, ", l); // ### DEBUG
         updateDomainAtPoint(L, length, width, hexMap, l, true);
 
         // Generate list of adjacent points in hex map

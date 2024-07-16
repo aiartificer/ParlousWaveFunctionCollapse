@@ -59,16 +59,18 @@ function Test_Parlous_WFC_Gen()
   print("Number of calls to gen: "..calls)
 end
 
-function Test_Bit_Count()
-  print("\n\nTest_Bit_Count")
+function Test_Mask()
+  print("\n\nTest_Mask")
   local hex_map = Setup_Hex_Map(10, 8)
   hex_map[1] = 1; hex_map[2] = 2; hex_map[3] = 3; hex_map[4] = 4; hex_map[5] = 5;
   hex_map[6] = 6; hex_map[7] = 7; hex_map[8] = 8; hex_map[9] = 9; hex_map[0] = 10;
-  assert(hex_map:bit_count(hex_map[1]) == 1, "Expected value of 1, actually "..tostring(hex_map:bit_count(hex_map[1])))
-  assert(hex_map:bit_count(hex_map[2]) == 1, "Expected value of 1, actually "..tostring(hex_map:bit_count(hex_map[2])))
-  assert(hex_map:bit_count(hex_map[3]) == 2, "Expected value of 2, actually "..tostring(hex_map:bit_count(hex_map[3])))
-  assert(hex_map:bit_count(hex_map[7]) == 3, "Expected value of 1, actually "..tostring(hex_map:bit_count(hex_map[7])))
-  assert(hex_map:bit_count(hex_map[8]) == 1, "Expected value of 1, actually "..tostring(hex_map:bit_count(hex_map[8])))
+  assert(hex_map:mask(1, hex_map[1]) > 0, "Expected value of 1, actually "..tostring(hex_map:mask(1, hex_map[1])))
+  assert(hex_map:mask(2, hex_map[2]) > 0, "Expected value of 2, actually "..tostring(hex_map:mask(2, hex_map[2])))
+  assert(hex_map:mask(8, hex_map[8]) > 0, "Expected value of 8, actually "..tostring(hex_map:mask(8, hex_map[8])))
+  assert(hex_map:mask(4, hex_map[8]) == 0, "Expected value of 0, actually "..tostring(hex_map:mask(4, hex_map[8])))
+  assert(hex_map:mask(5, hex_map[8]) == 0, "Expected value of 0, actually "..tostring(hex_map:mask(5, hex_map[8])))
+  assert(hex_map:mask(1, hex_map[9]) > 0, "Expected value of 1, actually "..tostring(hex_map:mask(1, hex_map[9])))
+  assert(hex_map:mask(2, hex_map[6]) > 0, "Expected value of 2, actually "..tostring(hex_map:mask(2, hex_map[6])))
 end
 
 function Test_Bit()
@@ -79,6 +81,19 @@ function Test_Bit()
   assert(hex_map:bit(hex_map[1]) == 1, "Expected value of 1, actually "..tostring(hex_map:bit(hex_map[1])))
   assert(hex_map:bit(hex_map[2]) == 2, "Expected value of 2, actually "..tostring(hex_map:bit(hex_map[2])))
   assert(hex_map:bit(hex_map[8]) == 4, "Expected value of 4, actually "..tostring(hex_map:bit(hex_map[8])))
+end
+
+function Test_Bit_Count()
+  print("\n\nTest_Bit_Count")
+  local hex_map = Setup_Hex_Map(10, 8)
+  hex_map[1] = 1; hex_map[2] = 2; hex_map[3] = 3; hex_map[4] = 4; hex_map[5] = 5;
+  hex_map[6] = 6; hex_map[7] = 7; hex_map[8] = 8; hex_map[9] = 9; hex_map[0] = 10;
+  assert(hex_map:bit_count(hex_map[1]) == 1, "Expected value of 1, actually "..tostring(hex_map:bit_count(hex_map[1])))
+  assert(hex_map:bit_count(hex_map[2]) == 1, "Expected value of 1, actually "..tostring(hex_map:bit_count(hex_map[2])))
+  assert(hex_map:bit_count(hex_map[8]) == 1, "Expected value of 1, actually "..tostring(hex_map:bit_count(hex_map[8])))
+  assert(hex_map:bit_count(hex_map[3]) == 2, "Expected value of 2, actually "..tostring(hex_map:bit_count(hex_map[8])))
+  assert(hex_map:bit_count(hex_map[7]) == 3, "Expected value of 3, actually "..tostring(hex_map:bit_count(hex_map[8])))
+  assert(hex_map:bit_count(hex_map[9]) == 2, "Expected value of 2, actually "..tostring(hex_map:bit_count(hex_map[8])))
 end
 
 function Test_Gen_NewWave_Selection()
@@ -95,19 +110,19 @@ function Test_Gen_NewWave_Selection()
     return x
   end)
   hex_map:pprint()
-  print("### "..hex_map:bit_count(hex_map[56]))  -- ### DEBUG
-  print("### "..hex_map:bit(hex_map[56]))  -- ### DEBUG
   assert(hex_map[34] == -2, "Expected value of -2, actually "..tostring(hex_map[34]))
   assert(hex_map[22] == -3, "Expected value of -3, actually "..tostring(hex_map[22]))
   assert(hex_map[56] == -5, "Expected value of -5, actually "..tostring(hex_map[56]))
   assert(hex_map[27] == -9, "Expected value of -9, actually "..tostring(hex_map[27]))
   assert(hex_map[44] == -17, "Expected value of -17, actually "..tostring(hex_map[44]))
+  assert(calls == 24, "Expected value of 24, actually "..tostring(calls))
   print("Number of calls to gen: "..calls)
 end
 
 print("> Test_Parlous_Wave_Function_Collapse <")
 Test_Parlous_WFC_Foreach()
 Test_Parlous_WFC_Gen()
-Test_Bit_Count()
+Test_Mask()
 Test_Bit()
+Test_Bit_Count()
 Test_Gen_NewWave_Selection()
