@@ -73,6 +73,43 @@ function Test_Mask()
   assert(hex_map:mask(2, hex_map[6]) > 0, "Expected value of 2, actually "..tostring(hex_map:mask(2, hex_map[6])))
 end
 
+function Test_Or()
+  print("\n\nTest_Or")
+  local hex_map = Setup_Hex_Map(10, 8)
+  hex_map[1] = 1; hex_map[2] = 2; hex_map[3] = 3; hex_map[4] = 4; hex_map[5] = 5;
+  hex_map[6] = 6; hex_map[7] = 7; hex_map[8] = 8; hex_map[9] = 9; hex_map[0] = 10;
+  assert(hex_map:Or(1, hex_map[1]) == 1, "Expected value of 1, actually "..tostring(hex_map:Or(1, hex_map[1])))
+  assert(hex_map:Or(2, hex_map[2]) == 2, "Expected value of 2, actually "..tostring(hex_map:Or(2, hex_map[2])))
+  assert(hex_map:Or(8, hex_map[8]) == 8, "Expected value of 8, actually "..tostring(hex_map:Or(8, hex_map[8])))
+  assert(hex_map:Or(4, hex_map[8]) == 12, "Expected value of 12, actually "..tostring(hex_map:Or(4, hex_map[8])))
+  assert(hex_map:Or(5, hex_map[8]) == 13, "Expected value of 13, actually "..tostring(hex_map:Or(5, hex_map[8])))
+  assert(hex_map:Or(1, hex_map[9]) == 9, "Expected value of 9, actually "..tostring(hex_map:Or(1, hex_map[9])))
+  assert(hex_map:Or(3, hex_map[6]) == 7, "Expected value of 7, actually "..tostring(hex_map:Or(2, hex_map[6])))
+end
+
+function Test_Not()
+  print("\n\nTest_Not")
+  local hex_map = Setup_Hex_Map(10, 8)
+  hex_map[1] = 1; hex_map[2] = 2; hex_map[3] = 3; hex_map[4] = 4; hex_map[5] = 5;
+  hex_map[6] = 6; hex_map[7] = 7; hex_map[8] = 8; hex_map[9] = 9; hex_map[0] = 10;
+  assert(hex_map:Not(hex_map[3]) == -4, "Expected value of -4, actually "..tostring(hex_map:Not(8, hex_map[8])))
+  assert(hex_map:Not(hex_map[8]) == -9, "Expected value of -9, actually "..tostring(hex_map:Not(4, hex_map[8])))
+  assert(hex_map:Not(hex_map[6]) == -7, "Expected value of -7, actually "..tostring(hex_map:Not(2, hex_map[6])))
+end
+
+function Test_Xor()
+  print("\n\nTest_Xor")
+  local hex_map = Setup_Hex_Map(10, 8)
+  hex_map[1] = 1; hex_map[2] = 2; hex_map[3] = 3; hex_map[4] = 4; hex_map[5] = 5;
+  hex_map[6] = 6; hex_map[7] = 7; hex_map[8] = 8; hex_map[9] = 9; hex_map[0] = 10;
+  assert(hex_map:Xor(1, hex_map[1]) == 0, "Expected value of 0, actually "..tostring(hex_map:Xor(1, hex_map[1])))
+  assert(hex_map:Xor(2, hex_map[2]) == 0, "Expected value of 0, actually "..tostring(hex_map:Xor(2, hex_map[2])))
+  assert(hex_map:Xor(4, hex_map[8]) == 12, "Expected value of 12, actually "..tostring(hex_map:Xor(4, hex_map[8])))
+  assert(hex_map:Xor(5, hex_map[8]) == 13, "Expected value of 13, actually "..tostring(hex_map:Xor(5, hex_map[8])))
+  assert(hex_map:Xor(1, hex_map[9]) == 8, "Expected value of 8, actually "..tostring(hex_map:Xor(1, hex_map[9])))
+  assert(hex_map:Xor(3, hex_map[6]) == 5, "Expected value of 5, actually "..tostring(hex_map:Xor(2, hex_map[6])))
+end
+
 function Test_Bit()
   print("\n\nTest_Bit")
   local hex_map = Setup_Hex_Map(10, 8)
@@ -123,6 +160,9 @@ print("> Test_Parlous_Wave_Function_Collapse <")
 Test_Parlous_WFC_Foreach()
 Test_Parlous_WFC_Gen()
 Test_Mask()
+Test_Or()
+Test_Not()
+Test_Xor()
 Test_Bit()
 Test_Bit_Count()
 Test_Gen_NewWave_Selection()

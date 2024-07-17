@@ -10,12 +10,43 @@
 
 
 template <typename T>
+static int bitXor(lua_State* L)                   //// [-0, +1, m]
+{
+    lua_Integer a = luaL_checkinteger(L, -2);
+    lua_Integer b = luaL_checkinteger(L, -1);
+    lua_pushinteger(L, a^b);                        // [-0, +1, -]
+                    
+
+    return 1;
+}
+
+template <typename T>
+static int bitNot(lua_State* L)                   //// [-0, +1, m]
+{
+    lua_Integer a = luaL_checkinteger(L, -1);
+    lua_pushinteger(L, ~a);                         // [-0, +1, -]
+                    
+
+    return 1;
+}
+
+template <typename T>
+static int bitOr(lua_State* L)                    //// [-0, +1, m]
+{
+    lua_Integer a = luaL_checkinteger(L, -2);
+    lua_Integer b = luaL_checkinteger(L, -1);
+    lua_pushinteger(L, a|b);                        // [-0, +1, -]
+                    
+
+    return 1;
+}
+
+template <typename T>
 static int bitMask(lua_State* L)                  //// [-0, +1, m]
 {
     lua_Integer mask = luaL_checkinteger(L, -2);
     lua_Integer v = luaL_checkinteger(L, -1);
-    lua_pushinteger(L,                              // [-0, +1, -]
-                    mask&v);
+    lua_pushinteger(L, mask&v);                     // [-0, +1, -]
 
     return 1;
 }
@@ -357,6 +388,26 @@ static int wfc__index_call(lua_State* L)          //// [-0, +1, m]
         else if (strcmp("mask", f) == 0)
         {
             lua_pushcclosure(L, bitMask<T>, 0);     // [-0, +1, -]
+            return 1;
+        }
+        else if (strcmp("And", f) == 0)
+        {
+            lua_pushcclosure(L, bitMask<T>, 0);     // [-0, +1, -]
+            return 1;
+        }
+        else if (strcmp("Or", f) == 0)
+        {
+            lua_pushcclosure(L, bitOr<T>, 0);       // [-0, +1, -]
+            return 1;
+        }
+        else if (strcmp("Not", f) == 0)
+        {
+            lua_pushcclosure(L, bitNot<T>, 0);       // [-0, +1, -]
+            return 1;
+        }
+        else if (strcmp("Xor", f) == 0)
+        {
+            lua_pushcclosure(L, bitXor<T>, 0);       // [-0, +1, -]
             return 1;
         }
         else if (strcmp("bit_count", f) == 0)
