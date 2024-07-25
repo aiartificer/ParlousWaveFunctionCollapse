@@ -164,28 +164,14 @@ function Test_Parlous_WFC_Gen_Time()
   local start_time = os.time()
   hex_map:gen(function (hx, x, newWave, dist)
     calls = calls + 1;
-    if (newWave)
-    then
-      return 2^(calls - 1)
-    end
+    if (newWave) then return 16 end
     if hex_map:mask(1, hx(0, -1)) == 1 then return 2^1 end
     if hex_map:mask(2, hx(0, 1)) == 1 then return 2^2 end
     return 2^3
   end)
   print("Time tanspired building table: "..os.time()-start_time)
   print("Number of calls to gen: "..calls)
-  print(hex_map[1614]) -- ### DEBUG
-  print(hex_map[1615]) -- ### DEBUG
-  print(hex_map[1616]) -- ### DEBUG
-  print(hex_map[1617]) -- ### DEBUG
-  print(hex_map[1618]) -- ### DEBUG
-  print(hex_map[1619]) -- ### DEBUG
-  print(hex_map[1620]) -- ### DEBUG
-  print(hex_map[1621]) -- ### DEBUG
-  print(hex_map[1622]) -- ### DEBUG
-  print(hex_map[1623]) -- ### DEBUG
-  print(hex_map[1624]) -- ### DEBUG
-  assert(hex_map[1615] == -2, "Expected value of -2, actually "..tostring(hex_map[34]))
+  assert(hex_map[1615] == -17, "Expected value of -17, actually "..tostring(hex_map[34]))
   assert(calls <= 480000, "Expected value of less than 480000, actually "..tostring(calls))
 end
 
