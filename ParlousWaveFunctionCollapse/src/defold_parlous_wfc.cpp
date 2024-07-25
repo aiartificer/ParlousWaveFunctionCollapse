@@ -21,7 +21,7 @@ static dmExtension::Result AppInitializeParlousWaveFunctionCollapse(dmExtension:
 static dmExtension::Result InitializeParlousWaveFunctionCollapse(dmExtension::Params* params)
 {
     // Init Lua
-    LuaInit(params->m_L);
+    LuaInitHexMap(params->m_L);
     dmLogInfo("Registered %s Extension", MODULE_NAME);
     return dmExtension::RESULT_OK;
 }
