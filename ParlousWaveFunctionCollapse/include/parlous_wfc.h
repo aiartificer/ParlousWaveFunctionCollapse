@@ -16,6 +16,8 @@ extern "C"{
     #include <dmsdk/sdk.h>
 #endif // IN_DEFOLD
 
+#define MODULE_NAME "parlous_wfc"
+
 #define Y(l,c) (l/c)
 #define row(l,c) (l/c)
 #define X(l,c) (l%c)

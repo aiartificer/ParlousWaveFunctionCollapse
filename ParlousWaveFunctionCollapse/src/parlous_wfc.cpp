@@ -1,5 +1,4 @@
 #define LIB_NAME "ParlousWaveFunctionCollapse"
-#define MODULE_NAME "parlous_wfc"
 
 #include <parlous_array.h>
 #include <cassert>
