@@ -1,6 +1,8 @@
 #define LIB_NAME "ParlousWaveFunctionCollapse"
 
 #include "indefold.h"
+#include "parlous_wfc.h"
+
 
 #ifndef IN_DEFOLD
 #else
