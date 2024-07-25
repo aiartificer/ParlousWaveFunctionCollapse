@@ -1,8 +1,13 @@
 #define LIB_NAME "ParlousWaveFunctionCollapse"
 
+#include "indefold.h"
+
+#ifndef IN_DEFOLD
+#else
 // include the Defold SDK
 #include <dmsdk/sdk.h>
 #include "parlous_array.h"
+#endif // IN_DEFOLD
 
 
 static dmExtension::Result AppInitializeParlousWaveFunctionCollapse(dmExtension::AppParams* params)
