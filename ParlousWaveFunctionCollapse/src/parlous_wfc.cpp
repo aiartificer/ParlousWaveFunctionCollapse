@@ -283,9 +283,9 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
     // lua_pushvalue(L, -1);                        // [-0, +1, -]
 
     // Allocate reusable circle buffer
-    printf("### v-----<>-----v\n"); // ### DEBUG   vvv ?MEMORY ERROR BELOW? vvv
+    // printf("### v-----<>-----v\n"); // ### DEBUG   vvv ?MEMORY ERROR BELOW? vvv
     lua_Integer buffer_size = 6*(maxDepth*maxDepth + maxDepth)/2;
-    printf("### ^-----<>-----^\n"); // ### DEBUG   ^^^ ?MEMORY ERROR ABOVE? ^^^
+    // printf("### ^-----<>-----^\n"); // ### DEBUG   ^^^ ?MEMORY ERROR ABOVE? ^^^
     T *circleBuffer = (T *)lua_newuserdata(L, buffer_size*sizeof(T));  // [-0, +1, m]
     lua_pushvalue(L, -2);                       // [-0, +1, -]
 
@@ -337,7 +337,9 @@ static int wfc__call(lua_State* L)                //// [-?, +1, m]
     }
 
     // Call __get
+    printf("### v-----<B>-----v\n"); // ### DEBUG   vvv ?MEMORY ERROR BELOW? vvv
     return get<T>(L);                               // [-0, +1, m]
+    printf("### ^-----<B>-----^\n"); // ### DEBUG   ^^^ ?MEMORY ERROR ABOVE? ^^^
 }
 
 template <typename T>

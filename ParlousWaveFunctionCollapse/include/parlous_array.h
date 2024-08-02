@@ -149,7 +149,9 @@ static int foreach(lua_State* L)                  //// [-0, +0, m]
         lua_pushinteger(L, i);                      // [-0, +1, -]
         lua_pushnumber(L, (T)arr[i]);               // [-0, +1, -]
         lua_call(L, 2, 0);                          // [-3, +0, e]
+        printf("### v-----<>-----v\n"); // ### DEBUG   vvv ?MEMORY ERROR BELOW? vvv
         lua_pushvalue(L, -1);                       // [-0, +1, -]
+        printf("### ^-----<>-----^\n"); // ### DEBUG   ^^^ ?MEMORY ERROR ABOVE? ^^^
     }
     lua_pop(L, 1);                                  // [-1, +0, -]
 
