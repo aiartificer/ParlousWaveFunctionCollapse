@@ -99,7 +99,7 @@ static int put(lua_State* L)                      //// [-0, +0, m]
     T *arr = (T *)lua_touserdata(L, -3);
     lua_Integer i = luaL_checkinteger(L, -2);
     T v = (T)luaL_checknumber(L, -1);
-    if(length <= i)
+    if(length <= i || 0 > i)
     {
         lua_pushstring(L, "Index out of bounds");
         lua_error(L);
