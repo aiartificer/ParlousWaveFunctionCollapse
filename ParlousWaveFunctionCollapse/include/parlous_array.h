@@ -79,7 +79,7 @@ static int get(lua_State* L)                      //// [-0, +1, m]
     lua_Integer length = lua_tointeger(L, lua_upvalueindex(1));
     T *arr = (T *)lua_touserdata(L, -2);
     lua_Integer i = luaL_checkinteger(L, -1);
-    if(length <= i)
+    if(length <= i || 0 > i)
         return luaL_error(L, "Index out of bounds");
     printf("### -----<i=%lld>-----\n", i); // ### DEBUG   vvv ?MEMORY ERROR BELOW? vvv
 
