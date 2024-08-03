@@ -337,9 +337,9 @@ static int wfc__call(lua_State* L)                //// [-?, +1, m]
     }
 
     // Call __get
-    printf("### v-----<A>-----v\n"); // ### DEBUG   vvv ?MEMORY ERROR BELOW? vvv
+    // printf("### v-----<A>-----v\n"); // ### DEBUG   vvv ?MEMORY ERROR BELOW? vvv
     return get<T>(L);                               // [-0, +1, m]
-    printf("### ^-----<A>-----^\n"); // ### DEBUG   ^^^ ?MEMORY ERROR ABOVE? ^^^
+    // printf("### ^-----<A>-----^\n"); // ### DEBUG   ^^^ ?MEMORY ERROR ABOVE? ^^^
 }
 
 template <typename T>
