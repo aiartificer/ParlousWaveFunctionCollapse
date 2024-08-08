@@ -124,13 +124,13 @@ function Test_Bit_Count()
   print("\n\nTest_Bit_Count")
   local hex_map = Setup_Hex_Map(10, 8)
   hex_map[1] = 1; hex_map[2] = 2; hex_map[3] = 3; hex_map[4] = 4; hex_map[5] = 5;
-  hex_map[6] = 6; hex_map[7] = 7; hex_map[8] = 8; hex_map[9] = 9; hex_map[0] = 10;
-  assert(hex_map:bit_count(hex_map[1]) == 1, "Expected value of 1, actually "..tostring(hex_map:bit_count(hex_map[1])))
-  assert(hex_map:bit_count(hex_map[2]) == 1, "Expected value of 1, actually "..tostring(hex_map:bit_count(hex_map[2])))
-  assert(hex_map:bit_count(hex_map[8]) == 1, "Expected value of 1, actually "..tostring(hex_map:bit_count(hex_map[8])))
-  assert(hex_map:bit_count(hex_map[3]) == 2, "Expected value of 2, actually "..tostring(hex_map:bit_count(hex_map[8])))
-  assert(hex_map:bit_count(hex_map[7]) == 3, "Expected value of 3, actually "..tostring(hex_map:bit_count(hex_map[8])))
-  assert(hex_map:bit_count(hex_map[9]) == 2, "Expected value of 2, actually "..tostring(hex_map:bit_count(hex_map[8])))
+  hex_map[6] = 6; hex_map[7] = 8; hex_map[8] = 7; hex_map[9] = 9; hex_map[0] = 10;
+  assert(hex_map.bit_count(hex_map[1]) == 1, "Expected value of 1, actually "..tostring(hex_map:bit_count(hex_map[1])))
+  assert(hex_map.bit_count(hex_map[2]) == 1, "Expected value of 1, actually "..tostring(hex_map:bit_count(hex_map[2])))
+  assert(hex_map.bit_count(hex_map[8]) == 3, "Expected value of 3, actually "..tostring(hex_map:bit_count(hex_map[8])))
+  assert(hex_map.bit_count(hex_map[3]) == 2, "Expected value of 2, actually "..tostring(hex_map:bit_count(hex_map[8])))
+  assert(hex_map.bit_count(hex_map[7]) == 1, "Expected value of 1, actually "..tostring(hex_map:bit_count(hex_map[8])))
+  assert(hex_map.bit_count(hex_map[9]) == 2, "Expected value of 2, actually "..tostring(hex_map:bit_count(hex_map[8])))
 end
 
 function Test_Gen_NewWave_Selection()

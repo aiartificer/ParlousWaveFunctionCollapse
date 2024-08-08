@@ -92,10 +92,9 @@ static size_t __countBits(T n)
 template <typename T>
 static int bitCount(lua_State* L)                 //// [-0, +1, m]
 {
-    T *hexMap = (T *)lua_touserdata(L, -2);
-    lua_Integer l = luaL_checkinteger(L, -1);
+    lua_Integer v = luaL_checkinteger(L, -1);
     lua_pushinteger(L,                              // [-0, +1, -]
-                    __countBits(hexMap[l]));
+                    __countBits(v));
 
     return 1;
 }
