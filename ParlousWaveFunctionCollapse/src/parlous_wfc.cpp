@@ -103,9 +103,7 @@ static int bitCount(lua_State* L)                 //// [-0, +1, m]
 template <typename T>
 static int bitVal(lua_State* L)                   //// [-0, +1, m]
 {
-    T *hexMap = (T *)lua_touserdata(L, -2);
-    lua_Integer l = luaL_checkinteger(L, -1);
-    lua_Integer v = hexMap[l];
+    lua_Integer v = luaL_checkinteger(L, -1);
     lua_Integer i = 0;
     while (v)
     {
