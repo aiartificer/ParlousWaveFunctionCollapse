@@ -117,97 +117,6 @@ static int bitVal(lua_State* L)                   //// [-0, +1, m]
 }
 
 template <typename T>
-static int genHexMapHelperFunc(lua_State* L)
-{
-    T *hexMap = (T *)lua_touserdata(L, lua_upvalueindex(1));
-    lua_Integer length = lua_tointeger(L, lua_upvalueindex(2));
-    lua_Integer width = lua_tointeger(L, lua_upvalueindex(3));
-    lua_Integer idx = lua_tointeger(L, lua_upvalueindex(4));
-    lua_Integer q = luaL_checkinteger(L, -2);
-    lua_Integer r = luaL_checkinteger(L, -1);
-    lua_Integer _r = Y(idx, width);
-    lua_Integer _q = X(idx, width) - (_r + (_r&1))/2;
-
-    // Convert axial coordinates to array index
-    lua_Integer l = even_axial_to_l(width, _q+q, _r+r);
-    // TODO Introduce flag for edge overflows
-    // printf("### idx = %ld\t(%ld, y=%ld)->(%ld, r=%ld)\tl = %ld\twidth =  %ld\tv = %ld\n", idx, _q, _r, q, r, l, width, hexMap[idx + l]); // ### DEBUG
-    if(length <= l || 0 > l)
-        return luaL_error(L, "Index out of bounds: (q=%d, r=%d)", q, r);
-    lua_pushinteger(L, ~hexMap[l]);            // [-0, +1, -]
-
-    return 1;
-}
-
-template <typename T>
-static int __updateDomainCall(lua_State* L,       //// [-0, +0, m]
-                              T *hexMap,
-                              lua_Integer length,
-                              lua_Integer width,
-                              lua_Integer l,
-                              bool newWave)
-{
-    // Check function on stack and copy it to top of stack
-    luaL_checktype(L, -1, LUA_TFUNCTION);
-    lua_pushvalue(L, -1);                           // [-0, +1, -]
-
-    // Add hex map helper function to paramter list
-    lua_pushlightuserdata (L, (void *)hexMap);      // [-0, +1, -]
-    lua_pushinteger(L, length);                     // [-0, +1, -]
-    lua_pushinteger(L, width);                      // [-0, +1, -]
-    lua_pushinteger(L, l);                          // [-0, +1, -]
-    lua_pushcclosure(L, genHexMapHelperFunc<T>, 4); // [-4, +1, -]
-
-    // Add value at present point as parameter
-    lua_pushnumber(L, ~(T)hexMap[l]);               // [-0, +1, -]
-
-    // Add new wave flag parameter
-    lua_pushboolean(L, newWave);                    // [-0, +1, -]
-
-    // Add function to measure distance from present point
-    lua_pushinteger(L, width);                      // [-0, +1, -]
-    lua_pushinteger(L, l);                          // [-0, +1, -]
-    lua_pushcclosure(L, v_rel_dist<T>, 2);          // [-2, +1, -]
-    
-    // Call the function and apply result to hex map
-    lua_call(L, 4, 1);                              // [-5, +1, e]
-    T result = (T)luaL_checknumber(L, -1);
-    // printf("### l = %ld\n", l); // ### DEBUG
-    hexMap[l] = ~result;
-    lua_pop(L, 1);                                  // [-1, +0, -]
-
-    return 0;
-}
-
-template <typename T>
-static int updateDomainAtPoint(lua_State* L,
-                               lua_Integer length,
-                               lua_Integer width,
-                               T *hexMap,
-                               lua_Integer l,
-                               bool newWave)
-{
-    // Skip when on map edge or when point is already determined
-    // TODO Introduce flag for edge overflows
-    if(length <= l || 0 > l)
-        return 0;
-    if (hexMap[l] != 0 && __countBits(~hexMap[l]) == 1) return 0;
-
-    // Location is good, apply rules
-    luaL_checktype(L, -1, LUA_TFUNCTION);
-    lua_Integer height = length/width;
-    const lua_Integer x = l%width;
-    const lua_Integer y = l/width;
-    if (x < REGION_SIZE/2 || x >= width - REGION_SIZE/2) return 0;
-    if (y < REGION_SIZE/2 || y >= height - REGION_SIZE/2) return 0;
-
-    // Apply rules
-    __updateDomainCall<T>(L, hexMap, length, width, l, newWave);
-
-    return 0;
-}
-
-template <typename T>
 static int hexCircle(lua_State* L,
                      lua_Integer width,
                      lua_Integer l,
@@ -270,14 +179,12 @@ static int hexCircle(lua_State* L,
 static int circle_len_factory(lua_State* L,       //// [-0, +1, m]
                               lua_Integer length,
                               lua_Integer type_size,
-                              lua_Integer maxDepth,
                               lua_CFunction fn)
 {
     // Collect len and put on stack
     lua_pushinteger(L, length);                     // [-0, +1, -]
     lua_pushinteger(L, type_size);                  // [-0, +1, -]
-    lua_pushinteger(L, maxDepth);                   // [-0, +1, -]
-    lua_pushcclosure(L, fn, 3);                     // [-3, +1, -]
+    lua_pushcclosure(L, fn, 2);                     // [-2, +1, -]
 
     // Return 1 item
     return 1;
@@ -300,8 +207,7 @@ static int wfc__circle_index_call(lua_State* L)   //// [-0, +1, m]
 template <typename T>
 static void wfc__defineCircleMetatable(lua_State* L,  //// [-0, +0, m]
                                        lua_Integer circleLength,
-                                       lua_Integer type_size,
-                                       lua_Integer maxDepth)
+                                       lua_Integer type_size)
 {
     // Create a metatable for the user data
     lua_createtable(L, 0, 1);                       // [-0, +1, m]
@@ -309,13 +215,12 @@ static void wfc__defineCircleMetatable(lua_State* L,  //// [-0, +0, m]
     // Define __len
     lua_pushstring(L, "__len");                     // [-0, +1, m]
     circle_len_factory(L, circleLength, type_size,
-                       maxDepth, len);              // [-0, +1, m]
+                       len);                        // [-0, +1, m]
     lua_settable(L, -3);                            // [-2, +0, -]
 
     // Define the __index method
     lua_pushstring(L, "__index");                   // [-0, +1, m]
     circle_len_factory(L, circleLength, type_size,
-                       maxDepth,
                        wfc__circle_index_call<T>);  // [-0, +1, m]
     lua_settable(L, -3);                            // [-2, +0, -]
 
@@ -328,7 +233,6 @@ static int getCircle(lua_State* L)                //// [-0, +1, m]
 {
     // Check and collect parameters from stack
     const lua_Integer width = lua_tointeger(L, lua_upvalueindex(1));
-    const lua_Integer maxDepth = lua_tointeger(L, lua_upvalueindex(2));
     T *arr = (T *)lua_touserdata(L, -3);
     lua_Integer l = luaL_checkinteger(L, -2);
     lua_Integer r = luaL_checkinteger(L, -1);
@@ -347,11 +251,105 @@ static int getCircle(lua_State* L)                //// [-0, +1, m]
     // Define metatable
     wfc__defineCircleMetatable<T>(L,                // [-0, +0, m]
                                   buffer_size,
-                                  sizeof(T),
-                                  maxDepth);
+                                  sizeof(T));
     
     // Return 1 item
     return 1;
+}
+
+template <typename T>
+static int genHexMapHelperFunc(lua_State* L)
+{
+    T *hexMap = (T *)lua_touserdata(L, lua_upvalueindex(1));
+    lua_Integer length = lua_tointeger(L, lua_upvalueindex(2));
+    lua_Integer width = lua_tointeger(L, lua_upvalueindex(3));
+    lua_Integer idx = lua_tointeger(L, lua_upvalueindex(4));
+    lua_Integer q = luaL_checkinteger(L, -2);
+    lua_Integer r = luaL_checkinteger(L, -1);
+    lua_Integer _r = Y(idx, width);
+    lua_Integer _q = X(idx, width) - (_r + (_r&1))/2;
+
+    // Convert axial coordinates to array index
+    lua_Integer l = even_axial_to_l(width, _q+q, _r+r);
+    // TODO Introduce flag for edge overflows
+    // printf("### idx = %ld\t(%ld, y=%ld)->(%ld, r=%ld)\tl = %ld\twidth =  %ld\tv = %ld\n", idx, _q, _r, q, r, l, width, hexMap[idx + l]); // ### DEBUG
+    if(length <= l || 0 > l)
+        return luaL_error(L, "Index out of bounds: (q=%d, r=%d)", q, r);
+    lua_pushinteger(L, ~hexMap[l]);            // [-0, +1, -]
+
+    return 1;
+}
+
+template <typename T>
+static int __updateDomainCall(lua_State* L,       //// [-0, +0, m]
+                              T *hexMap,
+                              lua_Integer length,
+                              lua_Integer width,
+                              lua_Integer l,
+                              bool newWave)
+{
+    // Check function on stack and copy it to top of stack
+    luaL_checktype(L, -1, LUA_TFUNCTION);
+    lua_pushvalue(L, -1);                           // [-0, +1, -]
+
+    // Add hex map helper function to paramter list
+    lua_pushlightuserdata (L, (void *)hexMap);      // [-0, +1, -]
+    lua_pushinteger(L, length);                     // [-0, +1, -]
+    lua_pushinteger(L, width);                      // [-0, +1, -]
+    lua_pushinteger(L, l);                          // [-0, +1, -]
+    lua_pushcclosure(L, genHexMapHelperFunc<T>, 4); // [-4, +1, -]
+
+    // Add value at present point as parameter
+    lua_pushnumber(L, ~(T)hexMap[l]);               // [-0, +1, -]
+
+    // Add new wave flag parameter
+    lua_pushboolean(L, newWave);                    // [-0, +1, -]
+
+    // Add function to measure distance from present point
+    lua_pushinteger(L, width);                      // [-0, +1, -]
+    lua_pushinteger(L, l);                          // [-0, +1, -]
+    lua_pushcclosure(L, v_rel_dist<T>, 2);          // [-2, +1, -]
+
+    // Add function to collect values in a circle around present point
+    lua_pushinteger(L, width);                      // [-0, +1, -]
+    lua_pushcclosure(L, getCircle<T>, 1);           // [-1, +1, -]
+
+    // Call the function and apply result to hex map
+    lua_call(L, 5, 1);                              // [-6, +1, e]
+    T result = (T)luaL_checknumber(L, -1);
+    // printf("### l = %ld\n", l); // ### DEBUG
+    hexMap[l] = ~result;
+    lua_pop(L, 1);                                  // [-1, +0, -]
+
+    return 0;
+}
+
+template <typename T>
+static int updateDomainAtPoint(lua_State* L,
+                               lua_Integer length,
+                               lua_Integer width,
+                               T *hexMap,
+                               lua_Integer l,
+                               bool newWave)
+{
+    // Skip when on map edge or when point is already determined
+    // TODO Introduce flag for edge overflows
+    if(length <= l || 0 > l)
+        return 0;
+    if (hexMap[l] != 0 && __countBits(~hexMap[l]) == 1) return 0;
+
+    // Location is good, apply rules
+    luaL_checktype(L, -1, LUA_TFUNCTION);
+    lua_Integer height = length/width;
+    const lua_Integer x = l%width;
+    const lua_Integer y = l/width;
+    if (x < REGION_SIZE/2 || x >= width - REGION_SIZE/2) return 0;
+    if (y < REGION_SIZE/2 || y >= height - REGION_SIZE/2) return 0;
+
+    // Apply rules
+    __updateDomainCall<T>(L, hexMap, length, width, l, newWave);
+
+    return 0;
 }
 
 template <typename T>
