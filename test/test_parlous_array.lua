@@ -151,6 +151,12 @@ function Test_Circile()
   circle = hex_map:circle(44, 2)
   assert(circle[0] == 143, "Expected value of 143, actually "..tostring(circle[0]))
   assert(circle[6] == 147, "Expected value of 147, actually "..tostring(circle[6]))
+  hex_map:gen(function (hx, x, newWave, dist, cir)
+    if x == 44 then
+      assert(cir(44, 1)[0] == 144, "Expected value of 144, actually "..tostring(circle[0]))
+    end
+    return x
+  end)
 end
 
 function Test_Gen_NewWave_Selection()
