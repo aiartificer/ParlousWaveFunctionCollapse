@@ -232,9 +232,9 @@ template <typename T>
 static int getCircle(lua_State* L)                //// [-0, +1, m]
 {
     // Check and collect parameters from stack
-    const lua_Integer width = lua_tointeger(L, lua_upvalueindex(1));
-    T *arr = (T *)lua_touserdata(L, -3);
-    lua_Integer l = luaL_checkinteger(L, -2);
+    T *hexMap = (T *)lua_touserdata(L, lua_upvalueindex(1));
+    const lua_Integer width = lua_tointeger(L, lua_upvalueindex(2));
+    lua_Integer l = lua_tointeger(L, lua_upvalueindex(3));
     lua_Integer r = luaL_checkinteger(L, -1);
 
     // Allocate reusable circle buffer
@@ -245,8 +245,13 @@ static int getCircle(lua_State* L)                //// [-0, +1, m]
     hexCircle(L, width, l, r, circleBuffer, buffer_size);
 
     // Replace indexes in cicrle buffer with values
+    printf("###### l = %ld\n", l); // ### DEBUG
+    printf("###### r = %ld\n", r); // ### DEBUG
     for (lua_Integer i = 0; i < 6*r; i++)
-        circleBuffer[i] = arr[circleBuffer[i]];
+    {
+        printf("###### i = %ld, circleBuffer[i] = %ld\n", i, circleBuffer[i]); // ### DEBUG
+        circleBuffer[i] = hexMap[circleBuffer[i]];
+    }
 
     // Define metatable
     wfc__defineCircleMetatable<T>(L,                // [-0, +0, m]
@@ -311,8 +316,10 @@ static int __updateDomainCall(lua_State* L,       //// [-0, +0, m]
     lua_pushcclosure(L, v_rel_dist<T>, 2);          // [-2, +1, -]
 
     // Add function to collect values in a circle around present point
+    lua_pushlightuserdata (L, (void *)hexMap);      // [-0, +1, -]
     lua_pushinteger(L, width);                      // [-0, +1, -]
-    lua_pushcclosure(L, getCircle<T>, 1);           // [-1, +1, -]
+    lua_pushinteger(L, l);                          // [-0, +1, -]
+    lua_pushcclosure(L, getCircle<T>, 3);           // [-3, +1, -]
 
     // Call the function and apply result to hex map
     lua_call(L, 5, 1);                              // [-6, +1, e]
