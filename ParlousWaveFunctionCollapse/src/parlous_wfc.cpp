@@ -267,6 +267,93 @@ static int hexCircle(lua_State* L,
     return 0;
 }
 
+static int circle_len_factory(lua_State* L,       //// [-0, +1, m]
+                              lua_Integer length,
+                              lua_Integer type_size,
+                              lua_Integer maxDepth,
+                              lua_CFunction fn)
+{
+    // Collect len and put on stack
+    lua_pushinteger(L, length);                     // [-0, +1, -]
+    lua_pushinteger(L, type_size);                  // [-0, +1, -]
+    lua_pushinteger(L, maxDepth);                   // [-0, +1, -]
+    lua_pushcclosure(L, fn, 3);                     // [-3, +1, -]
+
+    // Return 1 item
+    return 1;
+}
+
+template <typename T>
+static int wfc__circle_index_call(lua_State* L)   //// [-0, +1, m]
+{
+    // Check if a function call or array index
+    if(LUA_TSTRING == lua_type(L, -1))
+    { return luaL_error(L, "Invalid key"); }
+    else if(LUA_TNUMBER == lua_type(L, -1))
+        return get<T>(L);                          // [-0, +1, m]
+    
+    // Return 1 item
+    return 1;
+}
+
+// Top of stack must be userdata metatable will be applied to
+template <typename T>
+static void wfc__defineCircleMetatable(lua_State* L,  //// [-0, +0, m]
+                                       lua_Integer circleLength,
+                                       lua_Integer type_size,
+                                       lua_Integer maxDepth)
+{
+    // Create a metatable for the user data
+    lua_createtable(L, 0, 1);                       // [-0, +1, m]
+
+    // Define __len
+    lua_pushstring(L, "__len");                     // [-0, +1, m]
+    circle_len_factory(L, circleLength, type_size,
+                       maxDepth, len);              // [-0, +1, m]
+    lua_settable(L, -3);                            // [-2, +0, -]
+
+    // Define the __index method
+    lua_pushstring(L, "__index");                   // [-0, +1, m]
+    circle_len_factory(L, circleLength, type_size,
+                       maxDepth,
+                       wfc__circle_index_call<T>);  // [-0, +1, m]
+    lua_settable(L, -3);                            // [-2, +0, -]
+
+    // Set the metatable
+    lua_setmetatable(L, -2);                        // [-1, +0, -]
+}
+
+template <typename T>
+static int getCircle(lua_State* L)                //// [-0, +1, m]
+{
+    // Check and collect parameters from stack
+    const lua_Integer width = lua_tointeger(L, lua_upvalueindex(1));
+    const lua_Integer maxDepth = lua_tointeger(L, lua_upvalueindex(2));
+    T *arr = (T *)lua_touserdata(L, -3);
+    lua_Integer l = luaL_checkinteger(L, -2);
+    lua_Integer r = luaL_checkinteger(L, -1);
+
+    // Allocate reusable circle buffer
+    lua_Integer buffer_size = 6*r;
+    T *circleBuffer = (T *)lua_newuserdata(L, buffer_size*sizeof(T));  // [-0, +1, m]
+    
+    // Generate list of adjacent points in hex map
+    hexCircle(L, width, l, r, circleBuffer, buffer_size);
+
+    // Replace indexes in cicrle buffer with values
+    for (lua_Integer i = 0; i < 6*r; i++)
+        circleBuffer[i] = arr[circleBuffer[i]];
+
+    // Define metatable
+    wfc__defineCircleMetatable<T>(L,                // [-0, +0, m]
+                                  buffer_size,
+                                  sizeof(T),
+                                  maxDepth);
+    
+    // Return 1 item
+    return 1;
+}
+
 template <typename T>
 static int gen(lua_State* L)                      //// [-0, +0, m]
 {
@@ -284,7 +371,7 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
     lua_Integer buffer_size = 6*(maxDepth*maxDepth + maxDepth)/2;
     // printf("### ^-----<>-----^\n"); // ### DEBUG   ^^^ ?MEMORY ERROR ABOVE? ^^^
     T *circleBuffer = (T *)lua_newuserdata(L, buffer_size*sizeof(T));  // [-0, +1, m]
-    lua_pushvalue(L, -2);                       // [-0, +1, -]
+    lua_pushvalue(L, -2);                           // [-0, +1, -]
 
     // Setup loop
     for (lua_Integer i = 0; i < length; i++)
@@ -416,7 +503,14 @@ static int wfc__index_call(lua_State* L)          //// [-0, +1, m]
         }
         else if (strcmp("bit", f) == 0)
         {
-            lua_pushcclosure(L, bitVal<T>, 0);     // [-0, +1, -]
+            lua_pushcclosure(L, bitVal<T>, 0);      // [-0, +1, -]
+            return 1;
+        }
+        else if(strcmp("circle", f) == 0)
+        {
+            lua_pushinteger(L, width);              // [-0, +1, -]
+            lua_pushinteger(L, maxDepth);           // [-0, +1, -]
+            lua_pushcclosure(L, getCircle<T>, 2);   // [-1, +1, -]
             return 1;
         }
         else
