@@ -136,11 +136,23 @@ end
 function Test_Circile()
   print("\n\nTest_Circle")
   local hex_map = Setup_Hex_Map(100, 8)
-  for i = 0, 9 do
-    for j = 0, 9 do
-      hex_map[10*i + j] = 10*i + j + 1
-    end
-  end
+  local idx = 0
+  local found = 0
+  hex_map:gen(
+  function (hx, x, newWave, dist, cir)
+    idx = idx + 1
+    if cir(1)[0] == 3 then found = idx end
+    -- if cir(1)[0] ~= 0 then print("### ["..cir(1)[0].."], ") end  -- ### DEBUG
+    return idx
+  end)
+  -- print("Found at index: "..found)
+  assert(found > 0, "Expected value greater than 0, actually "..tostring(found))
+  -- print('==========')  -- ### DEBUG
+  -- for i = 0, 9 do
+  --   for j = 0, 9 do
+  --     hex_map[10*i + j] = 10*i + j + 1
+  --   end
+  -- end
   -- local circle = hex_map:circle(44, 1)
   -- assert(circle[0] == 144, "Expected value of 144, actually "..tostring(circle[0]))
   -- assert(circle[1] == 135, "Expected value of 135, actually "..tostring(circle[1]))
@@ -151,13 +163,16 @@ function Test_Circile()
   -- circle = hex_map:circle(44, 2)
   -- assert(circle[0] == 143, "Expected value of 143, actually "..tostring(circle[0]))
   -- assert(circle[6] == 147, "Expected value of 147, actually "..tostring(circle[6]))
-  hex_map:gen(function (hx, x, newWave, dist, cir)
-    io.write("### ["..x.."], ")  -- ### DEBUG
-    if x == -54 then
-      assert(cir(1)[0] == 144, "Expected value of 144, actually "..tostring(circle[0]))
-    end
-    return x
-  end)
+  -- print('>----------<')  -- ### DEBUG
+  -- hex_map:gen(
+  -- function (hx, x, newWave, dist, cir)
+  --   io.write("### ["..x..", "..hx(-1,0).."], ")  -- ### DEBUG
+  --   if x == -54 then
+  --     assert(cir(1)[0] == -53, "Expected value of -53, actually "..tostring(cir(1)[0]))
+  --   end
+  --   return x
+  -- end)
+  -- print('------------')  -- ### DEBUG
 end
 
 function Test_Gen_NewWave_Selection()

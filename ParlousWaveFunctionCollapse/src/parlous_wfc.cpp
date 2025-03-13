@@ -245,12 +245,12 @@ static int getCircle(lua_State* L)                //// [-0, +1, m]
     hexCircle(L, width, l, r, circleBuffer, buffer_size);
 
     // Replace indexes in cicrle buffer with values
-    printf("###### l = %ld\n", l); // ### DEBUG
-    printf("###### r = %ld\n", r); // ### DEBUG
+    // printf("###### l = %ld\n", l); // ### DEBUG
+    // printf("###### r = %ld\n", r); // ### DEBUG
     for (lua_Integer i = 0; i < 6*r; i++)
     {
-        printf("###### i = %ld, circleBuffer[i] = %ld\n", i, circleBuffer[i]); // ### DEBUG
-        circleBuffer[i] = hexMap[circleBuffer[i]];
+        // printf("###### i = %ld, circleBuffer[i] = %ld\n", i, circleBuffer[i]); // ### DEBUG
+        circleBuffer[i] = ~hexMap[circleBuffer[i]];
     }
 
     // Define metatable
@@ -344,6 +344,7 @@ static int updateDomainAtPoint(lua_State* L,
     if(length <= l || 0 > l)
         return 0;
     if (hexMap[l] != 0 && __countBits(~hexMap[l]) == 1) return 0;
+    // printf("{%ld, %ld}, ", hexMap[l], __countBits(~hexMap[l])); // ### DEBUG
 
     // Location is good, apply rules
     luaL_checktype(L, -1, LUA_TFUNCTION);
@@ -352,6 +353,7 @@ static int updateDomainAtPoint(lua_State* L,
     const lua_Integer y = l/width;
     if (x < REGION_SIZE/2 || x >= width - REGION_SIZE/2) return 0;
     if (y < REGION_SIZE/2 || y >= height - REGION_SIZE/2) return 0;
+    // printf("[x=%ld/%ld, y=%ld/%ld], ", x, width, y, height); // ### DEBUG
 
     // Apply rules
     __updateDomainCall<T>(L, hexMap, length, width, l, newWave);
