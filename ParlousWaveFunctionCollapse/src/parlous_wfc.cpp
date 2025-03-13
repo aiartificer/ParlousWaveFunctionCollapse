@@ -245,13 +245,8 @@ static int getCircle(lua_State* L)                //// [-0, +1, m]
     hexCircle(L, width, l, r, circleBuffer, buffer_size);
 
     // Replace indexes in cicrle buffer with values
-    // printf("###### l = %ld\n", l); // ### DEBUG
-    // printf("###### r = %ld\n", r); // ### DEBUG
     for (lua_Integer i = 0; i < 6*r; i++)
-    {
-        // printf("###### i = %ld, circleBuffer[i] = %ld\n", i, circleBuffer[i]); // ### DEBUG
         circleBuffer[i] = ~hexMap[circleBuffer[i]];
-    }
 
     // Define metatable
     wfc__defineCircleMetatable<T>(L,                // [-0, +0, m]
@@ -277,7 +272,6 @@ static int genHexMapHelperFunc(lua_State* L)
     // Convert axial coordinates to array index
     lua_Integer l = even_axial_to_l(width, _q+q, _r+r);
     // TODO Introduce flag for edge overflows
-    // printf("### idx = %ld\t(%ld, y=%ld)->(%ld, r=%ld)\tl = %ld\twidth =  %ld\tv = %ld\n", idx, _q, _r, q, r, l, width, hexMap[idx + l]); // ### DEBUG
     if(length <= l || 0 > l)
         return luaL_error(L, "Index out of bounds: (q=%d, r=%d)", q, r);
     lua_pushinteger(L, ~hexMap[l]);            // [-0, +1, -]
@@ -324,7 +318,6 @@ static int __updateDomainCall(lua_State* L,       //// [-0, +0, m]
     // Call the function and apply result to hex map
     lua_call(L, 5, 1);                              // [-6, +1, e]
     T result = (T)luaL_checknumber(L, -1);
-    // printf("### l = %ld\n", l); // ### DEBUG
     hexMap[l] = ~result;
     lua_pop(L, 1);                                  // [-1, +0, -]
 
@@ -344,7 +337,6 @@ static int updateDomainAtPoint(lua_State* L,
     if(length <= l || 0 > l)
         return 0;
     if (hexMap[l] != 0 && __countBits(~hexMap[l]) == 1) return 0;
-    // printf("{%ld, %ld}, ", hexMap[l], __countBits(~hexMap[l])); // ### DEBUG
 
     // Location is good, apply rules
     luaL_checktype(L, -1, LUA_TFUNCTION);
@@ -353,7 +345,6 @@ static int updateDomainAtPoint(lua_State* L,
     const lua_Integer y = l/width;
     if (x < REGION_SIZE/2 || x >= width - REGION_SIZE/2) return 0;
     if (y < REGION_SIZE/2 || y >= height - REGION_SIZE/2) return 0;
-    // printf("[x=%ld/%ld, y=%ld/%ld], ", x, width, y, height); // ### DEBUG
 
     // Apply rules
     __updateDomainCall<T>(L, hexMap, length, width, l, newWave);
@@ -374,9 +365,7 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
     // lua_pushvalue(L, -1);                        // [-0, +1, -]
 
     // Allocate reusable circle buffer
-    // printf("### v-----<>-----v\n"); // ### DEBUG   vvv ?MEMORY ERROR BELOW? vvv
     lua_Integer buffer_size = 6*(maxDepth*maxDepth + maxDepth)/2;
-    // printf("### ^-----<>-----^\n"); // ### DEBUG   ^^^ ?MEMORY ERROR ABOVE? ^^^
     T *circleBuffer = (T *)lua_newuserdata(L, buffer_size*sizeof(T));  // [-0, +1, m]
     lua_pushvalue(L, -2);                           // [-0, +1, -]
 
@@ -390,7 +379,6 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
         if (hexMap[l] != 0 && __countBits(~hexMap[l]) == 1) continue;
         
         // Update domain at present point
-        // printf("### l = %ld, ", l); // ### DEBUG
         updateDomainAtPoint(L, length, width, hexMap, l, true);
 
         // Generate list of adjacent points in hex map
@@ -399,10 +387,7 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
 
         // Apply rules to adjacent points
         for (lua_Integer al = 0; al < buffer_size; al++)
-        {
-            // printf("### [%ld]:  circleBuffer[%ld] = %ld\n", i, al, circleBuffer[al]);  // ### DEBUG
             updateDomainAtPoint(L, length, width, hexMap, circleBuffer[al], false);
-        }
     }
     lua_pop(L, 2);                                  // [-2, +0, -]
 
@@ -428,9 +413,7 @@ static int wfc__call(lua_State* L)                //// [-?, +1, m]
     }
 
     // Call __get
-    // printf("### v-----<A>-----v\n"); // ### DEBUG   vvv ?MEMORY ERROR BELOW? vvv
     return get<T>(L);                               // [-0, +1, m]
-    // printf("### ^-----<A>-----^\n"); // ### DEBUG   ^^^ ?MEMORY ERROR ABOVE? ^^^
 }
 
 template <typename T>
