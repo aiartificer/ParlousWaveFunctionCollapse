@@ -138,13 +138,19 @@ function Test_Circile()
   local hex_map = Setup_Hex_Map(100, 8)
   local idx = 0
   local found = 0
+  local foundAny = 0
+  local foundAll = 0
   hex_map:gen(
   function (hx, x, newWave, dist, cir)
     idx = idx + 1
     if cir(1)[0] == 3 then found = idx end
+    if cir(1):any(3) then foundAny = idx end
+    if cir(1):all(3) then foundAll = idx end
     return idx
   end)
   assert(found > 0, "Expected value greater than 0, actually "..tostring(found))
+  assert(foundAny > 0, "Expected value greater than 0, actually "..tostring(foundAny))
+  assert(foundAll == 0, "Expected value equal to 0, actually "..tostring(foundAll))
 end
 
 function Test_Gen_NewWave_Selection()
