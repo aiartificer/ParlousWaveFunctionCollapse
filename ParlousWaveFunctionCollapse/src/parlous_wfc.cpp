@@ -191,11 +191,72 @@ static int circle_len_factory(lua_State* L,       //// [-0, +1, m]
 }
 
 template <typename T>
+static int circleAny(lua_State* L)                //// [-0, +0, m]
+{
+    // Check and collect parameters from stack
+    lua_Integer length = lua_tointeger(L, lua_upvalueindex(1));
+    T *arr = (T *)lua_touserdata(L, -2);
+    lua_Integer val = luaL_checkinteger(L, -1);
+
+    // Search for value and stop if found
+    int returnVal = 0;
+    for (lua_Integer i = 0; i < length; i++)
+    {
+        if (arr[i] == val)
+        {
+            printf("-----<any:%li>-----\n", i); // ### DEBUG
+            returnVal = 1;
+            break;
+        }
+    }
+    lua_pushboolean(L, returnVal);                  // [-0, +1, -]
+
+    // Return 1 items
+    return 1;
+}
+
+template <typename T>
+static int circleAll(lua_State* L)                //// [-0, +0, m]
+{
+    // Check and collect parameters from stack
+    lua_Integer length = lua_tointeger(L, lua_upvalueindex(1));
+    T *arr = (T *)lua_touserdata(L, -2);
+    lua_Integer val = luaL_checkinteger(L, -1);
+
+    // Search for value and stop if found
+    int returnVal = 1;
+    for (lua_Integer i = 0; i < length; i++)
+    { if (arr[i] != val) returnVal = 0; }
+    lua_pushboolean(L, returnVal);                  // [-0, +1, -]
+
+    // Return 1 items
+    return 1;
+}
+
+template <typename T>
 static int wfc__circle_index_call(lua_State* L)   //// [-0, +1, m]
 {
+    lua_Integer length = lua_tointeger(L, lua_upvalueindex(1));
+
     // Check if a function call or array index
     if(LUA_TSTRING == lua_type(L, -1))
-    { return luaL_error(L, "Invalid key"); }
+    {
+        const char *f = luaL_checkstring(L, -1);
+        if(strcmp("any", f) == 0)
+        {
+            lua_pushinteger(L, length);             // [-0, +1, -]
+            lua_pushcclosure(L, circleAny<T>, 1);   // [-1, +1, -]
+            return 1;
+        }
+        else if(strcmp("all", f) == 0)
+        {
+            lua_pushinteger(L, length);             // [-0, +1, -]
+            lua_pushcclosure(L, circleAll<T>, 1);   // [-1, +1, -]
+            return 1;
+        }
+        else
+            return luaL_error(L, "Invalid key");
+    }
     else if(LUA_TNUMBER == lua_type(L, -1))
         return get<T>(L);                          // [-0, +1, m]
     
