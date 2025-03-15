@@ -191,23 +191,36 @@ static int circle_len_factory(lua_State* L,       //// [-0, +1, m]
 }
 
 template <typename T>
-static int circleAny(lua_State* L)                //// [-0, +0, m]
+static int circleAny(lua_State* L)                //// [-0, +1, m]
 {
     // Check and collect parameters from stack
     lua_Integer length = lua_tointeger(L, lua_upvalueindex(1));
     T *arr = (T *)lua_touserdata(L, -2);
-    lua_Integer val = luaL_checkinteger(L, -1);
+    luaL_checktype(L, -1, LUA_TFUNCTION);
+    lua_pushvalue(L, -1);                           // [-0, +1, -]
 
     // Search for value and stop if found
     int returnVal = 0;
     for (lua_Integer i = 0; i < length; i++)
     {
-        if (arr[i] == val)
-        {
-            returnVal = 1;
+        // Call function to identify type match
+        lua_pushnumber(L, (T)arr[i]);               // [-0, +1, -]
+        lua_call(L, 1, 1);                          // [-2, +1, e]
+
+        // Collect return value
+        returnVal = lua_toboolean(L, -1);
+        lua_pop(L, 1);                              // [-1, +0, -]
+
+        // Copy function reference and put at top of stack
+        lua_pushvalue(L, -1);                       // [-0, +1, -]
+
+        // Stop short if any matches found
+        if (returnVal)
             break;
-        }
     }
+
+    // Pop duplicate function and push return value
+    lua_pop(L, 1);                                  // [-1, +0, -]
     lua_pushboolean(L, returnVal);                  // [-0, +1, -]
 
     // Return 1 items
@@ -215,17 +228,35 @@ static int circleAny(lua_State* L)                //// [-0, +0, m]
 }
 
 template <typename T>
-static int circleAll(lua_State* L)                //// [-0, +0, m]
+static int circleAll(lua_State* L)                //// [-0, +1, m]
 {
     // Check and collect parameters from stack
     lua_Integer length = lua_tointeger(L, lua_upvalueindex(1));
     T *arr = (T *)lua_touserdata(L, -2);
-    lua_Integer val = luaL_checkinteger(L, -1);
+    luaL_checktype(L, -1, LUA_TFUNCTION);
+    lua_pushvalue(L, -1);                           // [-0, +1, -]
 
-    // Search for value and stop if found
+    // Search for value and flag if found
     int returnVal = 1;
     for (lua_Integer i = 0; i < length; i++)
-    { if (arr[i] != val) returnVal = 0; }
+    {
+        // Call function to identify type match
+        lua_pushnumber(L, (T)arr[i]);               // [-0, +1, -]
+        lua_call(L, 1, 1);                          // [-2, +1, e]
+
+        // Collect return value
+        returnVal = lua_toboolean(L, -1);
+        lua_pop(L, 1);                              // [-1, +0, -]
+
+        // Copy function reference and put at top of stack
+        lua_pushvalue(L, -1);                       // [-0, +1, -]
+
+        // Flag if any matches found
+        if (!returnVal) returnVal = 0;
+    }
+
+    // Pop duplicate function and push return value
+    lua_pop(L, 1);                                  // [-1, +0, -]
     lua_pushboolean(L, returnVal);                  // [-0, +1, -]
 
     // Return 1 items
