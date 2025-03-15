@@ -203,9 +203,21 @@ static int circleAny(lua_State* L)                //// [-0, +1, m]
     int returnVal = 0;
     for (lua_Integer i = 0; i < length; i++)
     {
-        // Call function to identify type match
+        // Add parameter for terrain type at present point
         lua_pushnumber(L, (T)arr[i]);               // [-0, +1, -]
-        lua_call(L, 1, 1);                          // [-2, +1, e]
+
+        // Add bit_count and bit as function parameters
+        lua_pushcclosure(L, bitCount<T>, 0);        // [-0, +1, -]
+        lua_pushcclosure(L, bitVal<T>, 0);          // [-0, +1, -]
+
+        // Add bitwise functions as function parameters
+        lua_pushcclosure(L, bitMask<T>, 0);         // [-0, +1, -]
+        lua_pushcclosure(L, bitOr<T>, 0);           // [-0, +1, -]
+        lua_pushcclosure(L, bitNot<T>, 0);          // [-0, +1, -]
+        lua_pushcclosure(L, bitXor<T>, 0);          // [-0, +1, -]
+
+        // Call function to identify type match
+        lua_call(L, 7, 1);                          // [-8, +1, e]
 
         // Collect return value
         returnVal = lua_toboolean(L, -1);
@@ -240,9 +252,21 @@ static int circleAll(lua_State* L)                //// [-0, +1, m]
     int returnVal = 1;
     for (lua_Integer i = 0; i < length; i++)
     {
-        // Call function to identify type match
+        // Add parameter for terrain type at present point
         lua_pushnumber(L, (T)arr[i]);               // [-0, +1, -]
-        lua_call(L, 1, 1);                          // [-2, +1, e]
+
+        // Add bit_count and bit as function parameters
+        lua_pushcclosure(L, bitCount<T>, 0);        // [-0, +1, -]
+        lua_pushcclosure(L, bitVal<T>, 0);          // [-0, +1, -]
+
+        // Add bitwise functions as function parameters
+        lua_pushcclosure(L, bitMask<T>, 0);         // [-0, +1, -]
+        lua_pushcclosure(L, bitOr<T>, 0);           // [-0, +1, -]
+        lua_pushcclosure(L, bitNot<T>, 0);          // [-0, +1, -]
+        lua_pushcclosure(L, bitXor<T>, 0);          // [-0, +1, -]
+
+        // Call function to identify type match
+        lua_call(L, 7, 1);                          // [-8, +1, e]
 
         // Collect return value
         returnVal = lua_toboolean(L, -1);

@@ -144,8 +144,12 @@ function Test_Circile()
   function (hx, x, newWave, dist, cir)
     idx = idx + 1
     if cir(1)[0] == 3 then found = idx end
-    if cir(1):any(function(v) return v == 3 end) then foundAny = idx end
-    if cir(1):all(function(v) return v == 3 end) then foundAll = idx end
+    if cir(1):any(function(v, bit_count, bit)
+      assert(bit_count(v) >= 0, "Expected value at least 0, actually "..tostring(bit_count(v)))
+      return v == 3 end) then foundAny = idx end
+    if cir(1):all(function(v, bit_count, bit)
+      assert(bit_count(v) >= 0, "Expected value at least 0, actually "..tostring(bit_count(v)))
+      return v == 3 end) then foundAll = idx end
     return idx
   end)
   assert(found > 0, "Expected value greater than 0, actually "..tostring(found))
