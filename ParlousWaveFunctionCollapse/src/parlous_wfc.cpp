@@ -204,7 +204,6 @@ static int circleAny(lua_State* L)                //// [-0, +0, m]
     {
         if (arr[i] == val)
         {
-            printf("-----<any:%lu>-----\n", i); // ### DEBUG
             returnVal = 1;
             break;
         }
