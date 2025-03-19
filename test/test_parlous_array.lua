@@ -150,7 +150,7 @@ function Test_Circile()
     if cir(1):all(function(v, bit_count, bit)
       assert(bit_count(v) >= 0, "Expected value at least 0, actually "..tostring(bit_count(v)))
       return v == 3 end) then foundAll = idx end
-    return 2^((idx-1)%10)-- idx -- 2^(idx-1)
+    return 2^((idx-1)%120)-- idx -- 2^(idx-1)
   end)
   hex_map:pprint()
   hex_map:foreach(
