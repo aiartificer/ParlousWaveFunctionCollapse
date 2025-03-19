@@ -498,7 +498,7 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
 
         // Generate list of adjacent points in hex map
         for (lua_Integer r = 1; r <= maxDepth; r++)
-            hexCircle(L, width, l, r, &circleBuffer[6*(r-1)], buffer_size);
+            hexCircle(L, width, l, r, &circleBuffer[6*(r-1)*r/2], buffer_size);
 
         // Apply rules to adjacent points
         for (lua_Integer al = 0; al < buffer_size; al++)
