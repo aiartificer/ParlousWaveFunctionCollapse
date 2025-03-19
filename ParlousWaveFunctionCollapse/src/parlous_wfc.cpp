@@ -120,9 +120,9 @@ template <typename T>
 static int hexCircle(lua_State* L,
                      lua_Integer width,
                      lua_Integer l,
-                     size_t r,
+                     lua_Integer r,
                      T *circle,
-                     size_t hexCircleLen)
+                     lua_Integer hexCircleLen)
 {
     if (hexCircleLen < 6*r)
         return luaL_error(L, "Size allocated for hexCircle too small: need=%d, allocated=%d)", 6*r, hexCircleLen);\
@@ -130,48 +130,56 @@ static int hexCircle(lua_State* L,
     // Start directly left of point
     size_t i = 0;
     circle[i++] = l - r;
+    printf("##########\n[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
 
     // Upper left of hex
-    for (size_t c = 0; c < r; c++)
+    for (lua_Integer c = 0; c < r; c++)
     {
         circle[i] = circle[i-1] - width + (row(circle[i-1], width)%2 == 0 ? 1 : 0);
         i++;
+        printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
 
     // Top of hex
-    for (size_t c = 0; c < r; c++)
+    for (lua_Integer c = 0; c < r; c++)
     {
         circle[i] = circle[i-1] + 1;
         i++;
+        printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
 
     // Upper right of hex
-    for (size_t c = 0; c < r; c++)
+    for (lua_Integer c = 0; c < r; c++)
     {
         circle[i] = circle[i-1] + width + (row(circle[i-1], width)%2 == 0 ? 1 : 0);
         i++;
+        printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
 
     // Lower right of hex
-    for (size_t c = 0; c < r; c++)
+    for (lua_Integer c = 0; c < r; c++)
     {
         circle[i] = circle[i-1] + width - (row(circle[i-1], width)%2 == 0 ? 0 : 1);
         i++;
+        printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
 
     // Bottom of hex
-    for (size_t c = 0; c < r; c++)
+    for (lua_Integer c = 0; c < r; c++)
     {
         circle[i] = circle[i-1] - 1;
         i++;
+        printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
 
     // Lower left of hex
-    for (size_t c = 0; c < r - 1; c++)
+    for (lua_Integer c = 0; c < r - 1; c++)
     {
         circle[i] = circle[i-1] - width - (row(circle[i-1], width)%2 == 0 ? 0 : 1);
         i++;
+        printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
+    printf("\n");  // ### DEBUG
 
     return 0;
 }
