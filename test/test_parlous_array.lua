@@ -150,8 +150,16 @@ function Test_Circile()
     if cir(1):all(function(v, bit_count, bit)
       assert(bit_count(v) >= 0, "Expected value at least 0, actually "..tostring(bit_count(v)))
       return v == 3 end) then foundAll = idx end
-    return idx
+    return 2^((idx-1)%10)-- idx -- 2^(idx-1)
   end)
+  hex_map:pprint()
+  hex_map:foreach(
+    function (i, x)
+      if i % 10 == 0 then io.write('\n') end
+      if x ~= 0 then io.write((-x - 1)..'\t')  -- math.sqrt
+      else io.write('.\t') end
+    end)
+  print()  -- ### DEBUG
   assert(found > 0, "Expected value greater than 0, actually "..tostring(found))
   assert(foundAny > 0, "Expected value greater than 0, actually "..tostring(foundAny))
   assert(foundAll == 0, "Expected value equal to 0, actually "..tostring(foundAll))
