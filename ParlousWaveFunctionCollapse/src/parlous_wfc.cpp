@@ -130,14 +130,14 @@ static int hexCircle(lua_State* L,
     // Start directly left of point
     size_t i = 0;
     circle[i++] = l - r;
-    printf("##########\n[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
+    // printf("##########\n[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
 
     // Upper left of hex
     for (lua_Integer c = 0; c < r; c++)
     {
         circle[i] = circle[i-1] - width + (row(circle[i-1], width)%2 == 0 ? 1 : 0);
         i++;
-        printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
+        // printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
 
     // Top of hex
@@ -145,7 +145,7 @@ static int hexCircle(lua_State* L,
     {
         circle[i] = circle[i-1] + 1;
         i++;
-        printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
+        // printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
 
     // Upper right of hex
@@ -153,7 +153,7 @@ static int hexCircle(lua_State* L,
     {
         circle[i] = circle[i-1] + width + (row(circle[i-1], width)%2 == 0 ? 1 : 0);
         i++;
-        printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
+        // printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
 
     // Lower right of hex
@@ -161,7 +161,7 @@ static int hexCircle(lua_State* L,
     {
         circle[i] = circle[i-1] + width - (row(circle[i-1], width)%2 == 0 ? 0 : 1);
         i++;
-        printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
+        // printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
 
     // Bottom of hex
@@ -169,7 +169,7 @@ static int hexCircle(lua_State* L,
     {
         circle[i] = circle[i-1] - 1;
         i++;
-        printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
+        // printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
 
     // Lower left of hex
@@ -177,9 +177,9 @@ static int hexCircle(lua_State* L,
     {
         circle[i] = circle[i-1] - width - (row(circle[i-1], width)%2 == 0 ? 0 : 1);
         i++;
-        printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
+        // printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
-    printf("\n");  // ### DEBUG
+    // printf("\n");  // ### DEBUG
 
     return 0;
 }
@@ -422,6 +422,7 @@ static int __updateDomainCall(lua_State* L,       //// [-0, +0, m]
     lua_pushcclosure(L, genHexMapHelperFunc<T>, 4); // [-4, +1, -]
 
     // Add value at present point as parameter
+    // printf("!!!{%lu}!!!  ", l);  // ### DEBUG
     lua_pushnumber(L, ~(T)hexMap[l]);               // [-0, +1, -]
 
     // Add new wave flag parameter
@@ -455,6 +456,7 @@ static int updateDomainAtPoint(lua_State* L,
                                lua_Integer l,
                                bool newWave)
 {
+    // printf("[%lu]  ", l);  // ### DEBUG
     // Skip when on map edge or when point is already determined
     // TODO Introduce flag for edge overflows
     if(length <= l || 0 > l)
@@ -497,6 +499,7 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
     {
         // Periodically (yet unsynchronized) select cell on map
         lua_Integer l = fmod((prime*i), length);
+        // printf("----------<l = %lu>----------\n", l);  // ### DEBUG
 
         // Check if cell has already completely collapsed the wave
         if (hexMap[l] != 0 && __countBits(~hexMap[l]) == 1) continue;
