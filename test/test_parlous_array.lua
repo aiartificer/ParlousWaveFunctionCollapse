@@ -133,7 +133,29 @@ function Test_Bit_Count()
   assert(hex_map.bit_count(hex_map[9]) == 2, "Expected value of 2, actually "..tostring(hex_map:bit_count(hex_map[8])))
 end
 
-function Test_Circile()
+function Test_Circle_Placement()
+  print("\n\nTest_Circle_Placement")
+  local hex_map = Setup_Hex_Map(100, 8)
+  local idx = 0
+  local found = 0
+  local foundAny = 0
+  local foundAll = 0
+  hex_map:gen(
+  function (hx, x, newWave, dist, cir)
+    idx = idx + 1
+    return 2^((idx-1)%120)
+  end)
+  -- hex_map:pprint()
+  hex_map:foreach(
+    function (i, x)
+      if i % 10 == 0 then io.write('\n') end
+      if x ~= 0 then io.write(hex_map.bit(-x - 1)..'\t')  -- math.sqrt
+      else io.write('.\t') end
+    end)
+  print()  -- ### DEBUG
+end
+
+function Test_Circle()
   print("\n\nTest_Circle")
   local hex_map = Setup_Hex_Map(100, 8)
   local idx = 0
@@ -143,23 +165,15 @@ function Test_Circile()
   hex_map:gen(
   function (hx, x, newWave, dist, cir)
     idx = idx + 1
-    -- if cir(1)[0] == 4 then found = idx end
-    -- if cir(1):any(function(v, bit_count, bit)
-    --   assert(bit_count(v) >= 0, "Expected value at least 0, actually "..tostring(bit_count(v)))
-    --   return v == 3 end) then foundAny = idx end
-    -- if cir(1):all(function(v, bit_count, bit)
-    --   assert(bit_count(v) >= 0, "Expected value at least 0, actually "..tostring(bit_count(v)))
-    --   return v == 3 end) then foundAll = idx end
+    if cir(1)[0] == 8 then found = idx end
+    if cir(1):any(function(v, bit_count, bit)
+      assert(bit_count(v) >= 0, "Expected value at least 0, actually "..tostring(bit_count(v)))
+      return v == 8 end) then foundAny = idx end
+    if cir(1):all(function(v, bit_count, bit)
+      assert(bit_count(v) >= 0, "Expected value at least 0, actually "..tostring(bit_count(v)))
+      return v == 8 end) then foundAll = idx end
     return 2^((idx-1)%120)-- idx -- 2^(idx-1)
   end)
-  hex_map:pprint()
-  hex_map:foreach(
-    function (i, x)
-      if i % 10 == 0 then io.write('\n') end
-      if x ~= 0 then io.write(hex_map.bit(-x - 1)..'\t')  -- math.sqrt
-      else io.write('.\t') end
-    end)
-  print()  -- ### DEBUG
   assert(found > 0, "Expected value greater than 0, actually "..tostring(found))
   assert(foundAny > 0, "Expected value greater than 0, actually "..tostring(foundAny))
   assert(foundAll == 0, "Expected value equal to 0, actually "..tostring(foundAll))
@@ -217,6 +231,7 @@ Test_Not()
 Test_Xor()
 Test_Bit()
 Test_Bit_Count()
-Test_Circile()
+Test_Circle_Placement()
+Test_Circle()
 Test_Gen_NewWave_Selection()
 Test_Parlous_WFC_Gen_Time()
