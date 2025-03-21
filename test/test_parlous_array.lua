@@ -145,7 +145,6 @@ function Test_Circle_Placement()
     idx = idx + 1
     return 2^((idx-1)%120)
   end)
-  -- hex_map:pprint()
   hex_map:foreach(
     function (i, x)
       if i % 10 == 0 then io.write('\n') end
@@ -153,6 +152,43 @@ function Test_Circle_Placement()
       else io.write('.\t') end
     end)
   print()  -- ### DEBUG
+end
+
+function Test_HexMapHelper_function()
+  print("\n\nTest_HexMapHelper_function")
+  local hex_map = Setup_Hex_Map(100, 8)
+  local idx = 0
+  local found1 = 0
+  local found2 = 0
+  local found3 = 0
+  local found4 = 0
+  local found5 = 0
+  local found6 = 0
+  hex_map:gen(
+  function (hx, x, newWave, dist, cir)
+    idx = idx + 1
+    if hx(-1,0) == 1 then found1 = idx end
+    if hx(0,-1) == 2 then found2 = idx end
+    if hx(1,-1) == 128 then found3 = idx end
+    if hx(1,0) == 32 then found4 = idx end
+    if hx(0,1) == 128 then found5 = idx end
+    if hx(-1,1) == 4 then found6 = idx end
+    -- io.write('['..idx..': '..hex_map.bit(hx(-1,1))..'], ')  -- ### DEBUG
+    return 2^((idx-1)%120)
+  end)
+  hex_map:foreach(
+    function (i, x)
+      if i % 10 == 0 then io.write('\n') end
+      if x ~= 0 then io.write(hex_map.bit(-x - 1)..'\t')  -- math.sqrt
+      else io.write('.\t') end
+    end)
+  print()
+  assert(found1 == 17, "Expected value of 17, actually "..tostring(found1))
+  assert(found2 == 24, "Expected value of 24, actually "..tostring(found2))
+  assert(found3 == 9, "Expected value of 9, actually "..tostring(found3))
+  assert(found4 == 17, "Expected value of 17, actually "..tostring(found4))
+  assert(found5 == 21, "Expected value of 21, actually "..tostring(found5))
+  assert(found6 == 28, "Expected value of 28, actually "..tostring(found6))
 end
 
 function Test_Circle()
@@ -232,6 +268,7 @@ Test_Xor()
 Test_Bit()
 Test_Bit_Count()
 Test_Circle_Placement()
+Test_HexMapHelper_function()
 Test_Circle()
 Test_Gen_NewWave_Selection()
 Test_Parlous_WFC_Gen_Time()
