@@ -173,7 +173,7 @@ function Test_HexMapHelper_function()
     if hx(1,0) == 32 then found4 = idx end
     if hx(0,1) == 128 then found5 = idx end
     if hx(-1,1) == 4 then found6 = idx end
-    -- io.write('['..idx..': '..hex_map.bit(hx(-1,1))..'], ')  -- ### DEBUG
+    -- io.write('['..idx..': '..hex_map.bit(hx(-1,0))..'], ')  -- ### DEBUG
     return 2^((idx-1)%120)
   end)
   hex_map:foreach(
@@ -182,7 +182,7 @@ function Test_HexMapHelper_function()
       if x ~= 0 then io.write(hex_map.bit(-x - 1)..'\t')  -- math.sqrt
       else io.write('.\t') end
     end)
-  print()
+  -- print()
   assert(found1 == 17, "Expected value of 17, actually "..tostring(found1))
   assert(found2 == 24, "Expected value of 24, actually "..tostring(found2))
   assert(found3 == 9, "Expected value of 9, actually "..tostring(found3))
@@ -201,15 +201,20 @@ function Test_Circle()
   hex_map:gen(
   function (hx, x, newWave, dist, cir)
     idx = idx + 1
-    if cir(1)[0] == 8 then found = idx end
+    -- io.write('['..idx..': '..hex_map.bit(cir(1)[0])..'], ')  -- ### DEBUG
+    if cir(1)[0] == 128 then found = idx end
     if cir(1):any(function(v, bit_count, bit)
       assert(bit_count(v) >= 0, "Expected value at least 0, actually "..tostring(bit_count(v)))
-      return v == 8 end) then foundAny = idx end
+      return v == 128 end) then foundAny = idx end
     if cir(1):all(function(v, bit_count, bit)
       assert(bit_count(v) >= 0, "Expected value at least 0, actually "..tostring(bit_count(v)))
-      return v == 8 end) then foundAll = idx end
-    return 2^((idx-1)%120)-- idx -- 2^(idx-1)
+      return v == 128 end) then foundAll = idx end
+    return 2^((idx-1)%120)
   end)
+  -- print()  -- FIXME Assertions fail without this print statement!!!
+  print("found = "..found)  -- ### DEBUG
+  print("foundAny = "..foundAny)  -- ### DEBUG
+  print("foundAll = "..foundAll)  -- ### DEBUG
   assert(found > 0, "Expected value greater than 0, actually "..tostring(found))
   assert(foundAny > 0, "Expected value greater than 0, actually "..tostring(foundAny))
   assert(foundAll == 0, "Expected value equal to 0, actually "..tostring(foundAll))
