@@ -195,6 +195,8 @@ function Test_HexMapHelper_function()
   local foundXLoopRight = 0
   local foundYLoopUp = 0
   local foundYLoopDown = 0
+  local foundULCorner = 0
+  local foundLRCorner = 0
   hex_map:gen(
   function (hx, x, newWave, dist, cir)
     idx = idx + 1
@@ -208,6 +210,8 @@ function Test_HexMapHelper_function()
     if hx(-5,0) == 2^5 then foundXLoopRight = idx end
     if hx(0,-5) == 2^8 then foundYLoopUp = idx end
     if hx(0,5) == 2^9 then foundYLoopDown = idx end
+    if hx(0,-10) == 2^9 then foundULCorner = idx end
+    if hx(1,10) == 1 then foundLRCorner = idx end
     -- io.write('['..idx..': '..hex_map.bit(hx(-1,0))..'], ')  -- ### DEBUG
     return 2^((idx-1)%120)
   end)
@@ -230,6 +234,8 @@ function Test_HexMapHelper_function()
   assert(foundXLoopRight == 35, "Expected value of 35, actually "..tostring(foundXLoopRight))
   assert(foundYLoopUp == 11, "Expected value of 11, actually "..tostring(foundYLoopUp))
   assert(foundYLoopDown == 12, "Expected value of 12, actually "..tostring(foundYLoopDown))
+  assert(foundULCorner == 25, "Expected value of 25, actually "..tostring(foundULCorner))
+  assert(foundLRCorner == 13, "Expected value of 13, actually "..tostring(foundLRCorner))
 end
 
 function Test_Circle()
