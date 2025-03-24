@@ -117,6 +117,27 @@ static int bitVal(lua_State* L)                   //// [-0, +1, m]
 }
 
 template <typename T>
+static T maybeLoopX(lua_Integer l,
+                    lua_Integer old_l,
+                    lua_Integer width)
+{
+    if (l/width == old_l/width) return l;
+    if (l < old_l) return l + width;
+    if (l > old_l) return l - width;
+    return l;
+}
+
+template <typename T>
+static T maybeLoopY(lua_Integer l,
+                    lua_Integer old_l,
+                    lua_Integer length)
+{
+    if (l >= 0 && l < length) return l;
+    if (l > 2*length) return l + length;
+    else return l - length;
+}
+
+template <typename T>
 static int hexCircle(lua_State* L,
                      lua_Integer width,
                      lua_Integer l,
@@ -126,15 +147,23 @@ static int hexCircle(lua_State* L,
 {
     if (hexCircleLen < 6*r)
         return luaL_error(L, "Size allocated for hexCircle too small: need=%d, allocated=%d)", 6*r, hexCircleLen);\
-
+    // lua_Integer q = luaL_checkinteger(L, -2);
+    // lua_Integer r = luaL_checkinteger(L, -1);
+    // lua_Integer _r = Y(l, width);
+    // lua_Integer _q = X(l, width) - (_r + (_r&1))/2;
+    
     // Start directly left of point
     size_t i = 0;
-    circle[i++] = l - r;
+    circle[i++] = maybeLoopX<T>(l - r, l, width);
     // printf("##########\n[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
 
     // Upper left of hex
+    // even_axial_to_l(width, q, r)
     for (lua_Integer c = 0; c < r; c++)
     {
+        // _r = Y(circle[i-1], width);
+        // _q = X(circle[i-1], width) - (_r + (_r&1))/2;
+        // circle[i] = even_axial_to_l(width, _q+1, _r-1);
         circle[i] = circle[i-1] - width + (row(circle[i-1], width)%2 == 0 ? 1 : 0);
         i++;
         // printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
@@ -151,6 +180,9 @@ static int hexCircle(lua_State* L,
     // Upper right of hex
     for (lua_Integer c = 0; c < r; c++)
     {
+        // _r = Y(circle[i-1], width);
+        // _q = X(circle[i-1], width) - (_r + (_r&1))/2;
+        // circle[i] = even_axial_to_l(width, _q, _r+1);
         circle[i] = circle[i-1] + width + (row(circle[i-1], width)%2 == 0 ? 1 : 0);
         i++;
         // printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
@@ -159,6 +191,9 @@ static int hexCircle(lua_State* L,
     // Lower right of hex
     for (lua_Integer c = 0; c < r; c++)
     {
+        // _r = Y(circle[i-1], width);
+        // _q = X(circle[i-1], width) - (_r + (_r&1))/2;
+        // circle[i] = even_axial_to_l(width, _q-1, _r+1);
         circle[i] = circle[i-1] + width - (row(circle[i-1], width)%2 == 0 ? 0 : 1);
         i++;
         // printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
@@ -175,6 +210,9 @@ static int hexCircle(lua_State* L,
     // Lower left of hex
     for (lua_Integer c = 0; c < r - 1; c++)
     {
+        // _r = Y(circle[i-1], width);
+        // _q = X(circle[i-1], width) - (_r + (_r&1))/2;
+        // circle[i] = even_axial_to_l(width, _q, _r-1);
         circle[i] = circle[i-1] - width - (row(circle[i-1], width)%2 == 0 ? 0 : 1);
         i++;
         // printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
@@ -368,6 +406,7 @@ static int getCircle(lua_State* L)                //// [-0, +1, m]
     hexCircle(L, width, l, r, circleBuffer, buffer_size);
 
     // Replace indexes in cicrle buffer with values
+    // FIXME Line 373 causes crash sometimes
     for (lua_Integer i = 0; i < 6*r; i++)
         circleBuffer[i] = ~hexMap[circleBuffer[i]];
 
