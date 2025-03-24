@@ -20,8 +20,10 @@ extern "C"{
 
 #define Y(l,c) (l/c)
 #define row(l,c) (l/c)
+#define axialRow(q,r) (r)
 #define X(l,c) (l%c)
 #define col(l,c) (l%c)
+#define axialCol(q,r) (q + (r + (r&1))/2)
 #define even_axial_to_l(w, q, r) (q + (r + ((r)&1))/2 + (w)*(r))
 
 

@@ -41,7 +41,10 @@ function Even_PPPrint(hex_map, WIDTH)
     function (i, x)
       if i % WIDTH == 0 then io.write('\n\n') end
       if i % WIDTH == 0 and math.floor(i/WIDTH)%2 == 0 then io.write('  ') end
-      if x ~= 0 then io.write(hex_map.bit(-x - 1)..'    ')
+      if x ~= 0 then
+        local val = hex_map.bit(-x - 1)
+        io.write(val..'   ')
+        if (val < 10) then io.write(' ') end
       else io.write('.    ') end
     end)
   print()
@@ -188,15 +191,23 @@ function Test_HexMapHelper_function()
   local found4 = 0
   local found5 = 0
   local found6 = 0
+  local foundXLoopLeft = 0
+  local foundXLoopRight = 0
+  local foundYLoopUp = 0
+  local foundYLoopDown = 0
   hex_map:gen(
   function (hx, x, newWave, dist, cir)
     idx = idx + 1
     if hx(-1,0) == 1 then found1 = idx end
     if hx(0,-1) == 2 then found2 = idx end
-    if hx(1,-1) == 128 then found3 = idx end -- 2^7: 8
-    if hx(1,0) == 32 then found4 = idx end -- 2^5: 6
-    if hx(0,1) == 128 then found5 = idx end -- 2^7: 8
-    if hx(-1,1) == 4 then found6 = idx end
+    if hx(1,-1) == 2^26 then found3 = idx end
+    if hx(1,0) == 2^4 then found4 = idx end
+    if hx(0,1) == 2^4 then found5 = idx end
+    if hx(-1,1) == 2^2 then found6 = idx end
+    if hx(-5,0) == 2^9 then foundXLoopLeft = idx end
+    if hx(-5,0) == 2^5 then foundXLoopRight = idx end
+    if hx(0,-5) == 2^8 then foundYLoopUp = idx end
+    if hx(0,5) == 2^9 then foundYLoopDown = idx end
     -- io.write('['..idx..': '..hex_map.bit(hx(-1,0))..'], ')  -- ### DEBUG
     return 2^((idx-1)%120)
   end)
@@ -209,18 +220,22 @@ function Test_HexMapHelper_function()
   --     else io.write('.\t') end
   --   end)
   -- print()
-  assert(found1 == 17, "Expected value of 17, actually "..tostring(found1))
-  assert(found2 == 36, "Expected value of 36, actually "..tostring(found2))
-  assert(found3 == 9, "Expected value of 9, actually "..tostring(found3))
-  assert(found4 == 17, "Expected value of 17, actually "..tostring(found4))
-  assert(found5 == 21, "Expected value of 21, actually "..tostring(found5))
-  assert(found6 == 26, "Expected value of 26, actually "..tostring(found6))
+  assert(found1 == 3, "Expected value of 3, actually "..tostring(found1))
+  assert(found2 == 3, "Expected value of 3, actually "..tostring(found2))
+  assert(found3 == 28, "Expected value of 28, actually "..tostring(found3))
+  assert(found4 == 16, "Expected value of 16, actually "..tostring(found4))
+  assert(found5 == 35, "Expected value of 35, actually "..tostring(found5))
+  assert(found6 == 8, "Expected value of 8, actually "..tostring(found6))
+  assert(foundXLoopLeft == 25, "Expected value of 25, actually "..tostring(foundXLoopLeft))
+  assert(foundXLoopRight == 35, "Expected value of 35, actually "..tostring(foundXLoopRight))
+  assert(foundYLoopUp == 11, "Expected value of 11, actually "..tostring(foundYLoopUp))
+  assert(foundYLoopDown == 12, "Expected value of 12, actually "..tostring(foundYLoopDown))
 end
 
 function Test_Circle()
   print("\n\nTest_Circle")
   print("----------------------------------------")
-  local WIDTH = 12 -- 20
+  local WIDTH = 10 -- 12 -- 20
 
   -- Initialize hex_map
   local hex_map = parlous_wfc.new_hex_map(WIDTH*WIDTH, 8, WIDTH, 5, 17)
@@ -230,9 +245,14 @@ function Test_Circle()
     if idx == math.floor(WIDTH*WIDTH/2) + math.floor(WIDTH/2) then return hex_map.Not(2^7) end
     return 0 end)
   -- PPPrint(hex_map)
+  hex_map:foreach( function (i, x) io.write('['..i..']: '..x..', ') end)
 
   -- Define function to look for set hex cell (bit = 8)s
   function Look_for_8(v, bit_count, bit)
+    if bit_count(v) ~= 1 then  -- ### DEBUG
+      if v == -1 then io.write('*, ')  -- ### DEBUG
+      else io.write(v..', ') end  -- ### DEBUG   '$, '
+    else io.write(bit(v)..', ') end  -- ### DEBUG
     if bit_count(v) ~= 1 then return false end
     if bit(v) == 8 then return true else return false end
    end
@@ -243,11 +263,17 @@ function Test_Circle()
   hex_map:gen(
   function (hx, x, newWave, dist, cir)
     idx = idx + 1
+    io.write('\n### ['..(idx+1)..']: ')  -- ### DEBUG
     if hex_map.bit_count(x) == 1 then repeats = repeats + 1 end
+    io.write('|1| ')  -- ### DEBUG
     if cir(1):any(Look_for_8) then return 1 end
+    io.write('|2| ')  -- ### DEBUG
     if cir(2):any(Look_for_8) then return 2 end
+    io.write('|3| ')  -- ### DEBUG
     if cir(3):any(Look_for_8) then return 4 end
+    io.write('|4| ')  -- ### DEBUG
     if cir(4):any(Look_for_8) then return 8 end
+    io.write('|5| ')  -- ### DEBUG
     if cir(5):any(Look_for_8) then return 16 end
     return 32
   end)

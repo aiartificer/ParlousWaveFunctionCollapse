@@ -117,6 +117,63 @@ static int bitVal(lua_State* L)                   //// [-0, +1, m]
 }
 
 template <typename T>
+static T hx(lua_Integer idx, lua_Integer width, lua_Integer length,
+            T q, T r)
+{
+    // Set l to new location
+    lua_Integer _r = Y(idx, width);
+    lua_Integer _q = X(idx, width) - (_r + (_r&1))/2;
+    lua_Integer l = even_axial_to_l(width, _q+q, _r+r);
+
+    // Loop around Y-axis
+    if (0 > l)
+        l = length + l;
+    if (length <= l)
+        l = l - length;
+    
+    // Loop around X-axis
+    lua_Integer colDir = axialCol(q,r);
+    if (colDir > 0 && idx%width >= (width - colDir))
+        l = l - width;
+    if (colDir < 0 && idx%width < -colDir)
+        l = l + width;
+
+    return l;
+}
+#define hxL(idx, width, length) hx(idx, width, length, -1, 0)
+#define hxUL(idx, width, length) hx(idx, width, length, -0, -1)
+#define hxUR(idx, width, length) hx(idx, width, length, 1, -1)
+#define hxR(idx, width, length) hx(idx, width, length, 1, 0)
+#define hxDR(idx, width, length) hx(idx, width, length, 0, 1)
+#define hxDL(idx, width, length) hx(idx, width, length, -1, 1)
+
+template <typename T>
+static int genHexMapHelperFunc(lua_State* L)
+{
+    T *hexMap = (T *)lua_touserdata(L, lua_upvalueindex(1));
+    lua_Integer length = lua_tointeger(L, lua_upvalueindex(2));
+    lua_Integer width = lua_tointeger(L, lua_upvalueindex(3));
+    lua_Integer idx = lua_tointeger(L, lua_upvalueindex(4));
+    lua_Integer q = luaL_checkinteger(L, -2);
+    lua_Integer r = luaL_checkinteger(L, -1);
+
+    // Convert axial coordinates to array index
+    // lua_Integer _r = Y(idx, width);
+    // lua_Integer _q = X(idx, width) - (_r + (_r&1))/2;
+    // lua_Integer l = even_axial_to_l(width, _q+q, _r+r);
+    // // TODO Introduce flag for edge overflows
+    // if(length <= l || 0 > l)
+    //     return luaL_error(L, "Index out of bounds: (q=%d, r=%d)", q, r);
+    lua_Integer l = hx(idx, width, length, q, r);
+
+    // Push return value onto stack
+    lua_pushinteger(L, ~hexMap[l]);            // [-0, +1, -]
+    if (idx == 63) printf("### [63]: q = %li, r = %li, l = %li, value = %li\n", q, r, l, ~hexMap[l]);  // ### DEBUG
+
+    return 1;
+}
+
+template <typename T>
 static T maybeLoopX(lua_Integer l,
                     lua_Integer old_l,
                     lua_Integer width)
@@ -133,13 +190,23 @@ static T maybeLoopY(lua_Integer l,
                     lua_Integer length)
 {
     if (l >= 0 && l < length) return l;
-    if (l > 2*length) return l + length;
+    if (l < 0) return length - 1 - l;
     else return l - length;
 }
+
+// template <typename T>
+// static T maybeLoop(lua_Integer l,
+//                    lua_Integer old_l,
+//                    lua_Integer length)
+// {
+//     l = maybeLoopY<T>(l, old_l, length);
+//     return maybeLoopX<T>(l, old_l, length);
+// }
 
 template <typename T>
 static int hexCircle(lua_State* L,
                      lua_Integer width,
+                     lua_Integer length,
                      lua_Integer l,
                      lua_Integer r,
                      T *circle,
@@ -154,7 +221,10 @@ static int hexCircle(lua_State* L,
     
     // Start directly left of point
     size_t i = 0;
-    circle[i++] = maybeLoopX<T>(l - r, l, width);
+    circle[i++] = hx<lua_Integer>(l, width, length, -r, 0);
+    // circle[i++] = maybeLoopX<T>(l - r, l, length);
+    // printf("\n### maybeLoop(%li, %li, %li, %li): %li", l-r, r, l, length, circle[i-1]);  // ### DEBUG
+    // printf("\n###==> %li: %d && %d: %d", length, (l-r) >= 0, (l-r) < length, (l-r) < 0);  // ### DEBUG
     // printf("##########\n[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
 
     // Upper left of hex
@@ -164,7 +234,13 @@ static int hexCircle(lua_State* L,
         // _r = Y(circle[i-1], width);
         // _q = X(circle[i-1], width) - (_r + (_r&1))/2;
         // circle[i] = even_axial_to_l(width, _q+1, _r-1);
-        circle[i] = circle[i-1] - width + (row(circle[i-1], width)%2 == 0 ? 1 : 0);
+        // if (l < width)
+        //     circle[i] = circle[i-1] + length - width + (row(circle[i-1], width)%2 == 0 ? 1 : 0);
+        // else
+        // circle[i] = circle[i-1] - width + (row(circle[i-1], width)%2 == 0 ? 1 : 0);
+        circle[i] = hxUR(circle[i-1], width, length);
+        // if (circle[i] != (circle[i-1] - width + (row(circle[i-1], width)%2 == 0 ? 1 : 0)))  // ### DEBUG
+        //     printf("###### %li !== %li\n", circle[i], (circle[i-1] - width + (row(circle[i-1], width)%2 == 0 ? 1 : 0)));  // ### DEBUG
         i++;
         // printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
@@ -172,7 +248,8 @@ static int hexCircle(lua_State* L,
     // Top of hex
     for (lua_Integer c = 0; c < r; c++)
     {
-        circle[i] = circle[i-1] + 1;
+        // circle[i] = maybeLoopX<T>(circle[i-1] + 1, circle[i-1], length);
+        circle[i] = hxR(circle[i-1], width, length);
         i++;
         // printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
@@ -184,6 +261,7 @@ static int hexCircle(lua_State* L,
         // _q = X(circle[i-1], width) - (_r + (_r&1))/2;
         // circle[i] = even_axial_to_l(width, _q, _r+1);
         circle[i] = circle[i-1] + width + (row(circle[i-1], width)%2 == 0 ? 1 : 0);
+        // circle[i] = hxDR(circle[i-1], width, length);
         i++;
         // printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
@@ -195,6 +273,7 @@ static int hexCircle(lua_State* L,
         // _q = X(circle[i-1], width) - (_r + (_r&1))/2;
         // circle[i] = even_axial_to_l(width, _q-1, _r+1);
         circle[i] = circle[i-1] + width - (row(circle[i-1], width)%2 == 0 ? 0 : 1);
+        // circle[i] = hxDL(circle[i-1], width, length);
         i++;
         // printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
@@ -202,7 +281,8 @@ static int hexCircle(lua_State* L,
     // Bottom of hex
     for (lua_Integer c = 0; c < r; c++)
     {
-        circle[i] = circle[i-1] - 1;
+        circle[i] = maybeLoopX<T>(circle[i-1] - 1, circle[i-1], length);
+        // circle[i] = hxL(circle[i-1], width, length);
         i++;
         // printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
@@ -214,6 +294,7 @@ static int hexCircle(lua_State* L,
         // _q = X(circle[i-1], width) - (_r + (_r&1))/2;
         // circle[i] = even_axial_to_l(width, _q, _r-1);
         circle[i] = circle[i-1] - width - (row(circle[i-1], width)%2 == 0 ? 0 : 1);
+        // circle[i] = hxUL(circle[i-1], width, length);
         i++;
         // printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
@@ -223,12 +304,12 @@ static int hexCircle(lua_State* L,
 }
 
 static int circle_len_factory(lua_State* L,       //// [-0, +1, m]
-                              lua_Integer length,
+                              lua_Integer circleLength,
                               lua_Integer type_size,
                               lua_CFunction fn)
 {
     // Collect len and put on stack
-    lua_pushinteger(L, length);                     // [-0, +1, -]
+    lua_pushinteger(L, circleLength);               // [-0, +1, -]
     lua_pushinteger(L, type_size);                  // [-0, +1, -]
     lua_pushcclosure(L, fn, 2);                     // [-2, +1, -]
 
@@ -240,14 +321,14 @@ template <typename T>
 static int circleAny(lua_State* L)                //// [-0, +1, m]
 {
     // Check and collect parameters from stack
-    lua_Integer length = lua_tointeger(L, lua_upvalueindex(1));
+    lua_Integer circleLength = lua_tointeger(L, lua_upvalueindex(1));
     T *arr = (T *)lua_touserdata(L, -2);
     luaL_checktype(L, -1, LUA_TFUNCTION);
     lua_pushvalue(L, -1);                           // [-0, +1, -]
 
     // Search for value and stop if found
     int returnVal = 0;
-    for (lua_Integer i = 0; i < length; i++)
+    for (lua_Integer i = 0; i < circleLength; i++)
     {
         // Add parameter for terrain type at present point
         lua_pushnumber(L, (T)arr[i]);               // [-0, +1, -]
@@ -289,14 +370,14 @@ template <typename T>
 static int circleAll(lua_State* L)                //// [-0, +1, m]
 {
     // Check and collect parameters from stack
-    lua_Integer length = lua_tointeger(L, lua_upvalueindex(1));
+    lua_Integer circleLength = lua_tointeger(L, lua_upvalueindex(1));
     T *arr = (T *)lua_touserdata(L, -2);
     luaL_checktype(L, -1, LUA_TFUNCTION);
     lua_pushvalue(L, -1);                           // [-0, +1, -]
 
     // Search for value and flag if found
     int returnVal = 1;
-    for (lua_Integer i = 0; i < length; i++)
+    for (lua_Integer i = 0; i < circleLength; i++)
     {
         // Add parameter for terrain type at present point
         lua_pushnumber(L, (T)arr[i]);               // [-0, +1, -]
@@ -336,7 +417,7 @@ static int circleAll(lua_State* L)                //// [-0, +1, m]
 template <typename T>
 static int wfc__circle_index_call(lua_State* L)   //// [-0, +1, m]
 {
-    lua_Integer length = lua_tointeger(L, lua_upvalueindex(1));
+    lua_Integer circleLength = lua_tointeger(L, lua_upvalueindex(1));
 
     // Check if a function call or array index
     if(LUA_TSTRING == lua_type(L, -1))
@@ -344,13 +425,13 @@ static int wfc__circle_index_call(lua_State* L)   //// [-0, +1, m]
         const char *f = luaL_checkstring(L, -1);
         if(strcmp("any", f) == 0)
         {
-            lua_pushinteger(L, length);             // [-0, +1, -]
+            lua_pushinteger(L, circleLength);       // [-0, +1, -]
             lua_pushcclosure(L, circleAny<T>, 1);   // [-1, +1, -]
             return 1;
         }
         else if(strcmp("all", f) == 0)
         {
-            lua_pushinteger(L, length);             // [-0, +1, -]
+            lua_pushinteger(L, circleLength);       // [-0, +1, -]
             lua_pushcclosure(L, circleAll<T>, 1);   // [-1, +1, -]
             return 1;
         }
@@ -395,7 +476,8 @@ static int getCircle(lua_State* L)                //// [-0, +1, m]
     // Check and collect parameters from stack
     T *hexMap = (T *)lua_touserdata(L, lua_upvalueindex(1));
     const lua_Integer width = lua_tointeger(L, lua_upvalueindex(2));
-    lua_Integer l = lua_tointeger(L, lua_upvalueindex(3));
+    const lua_Integer length = lua_tointeger(L, lua_upvalueindex(3));
+    lua_Integer l = lua_tointeger(L, lua_upvalueindex(4));
     lua_Integer r = luaL_checkinteger(L, -1);
 
     // Allocate reusable circle buffer
@@ -403,7 +485,7 @@ static int getCircle(lua_State* L)                //// [-0, +1, m]
     T *circleBuffer = (T *)lua_newuserdata(L, buffer_size*sizeof(T));  // [-0, +1, m]
     
     // Generate list of adjacent points in hex map
-    hexCircle(L, width, l, r, circleBuffer, buffer_size);
+    hexCircle(L, width, length, l, r, circleBuffer, buffer_size);
 
     // Replace indexes in cicrle buffer with values
     // FIXME Line 373 causes crash sometimes
@@ -416,28 +498,6 @@ static int getCircle(lua_State* L)                //// [-0, +1, m]
                                   sizeof(T));
     
     // Return 1 item
-    return 1;
-}
-
-template <typename T>
-static int genHexMapHelperFunc(lua_State* L)
-{
-    T *hexMap = (T *)lua_touserdata(L, lua_upvalueindex(1));
-    lua_Integer length = lua_tointeger(L, lua_upvalueindex(2));
-    lua_Integer width = lua_tointeger(L, lua_upvalueindex(3));
-    lua_Integer idx = lua_tointeger(L, lua_upvalueindex(4));
-    lua_Integer q = luaL_checkinteger(L, -2);
-    lua_Integer r = luaL_checkinteger(L, -1);
-    lua_Integer _r = Y(idx, width);
-    lua_Integer _q = X(idx, width) - (_r + (_r&1))/2;
-
-    // Convert axial coordinates to array index
-    lua_Integer l = even_axial_to_l(width, _q+q, _r+r);
-    // TODO Introduce flag for edge overflows
-    if(length <= l || 0 > l)
-        return luaL_error(L, "Index out of bounds: (q=%d, r=%d)", q, r);
-    lua_pushinteger(L, ~hexMap[l]);            // [-0, +1, -]
-
     return 1;
 }
 
@@ -475,8 +535,9 @@ static int __updateDomainCall(lua_State* L,       //// [-0, +0, m]
     // Add function to collect values in a circle around present point
     lua_pushlightuserdata (L, (void *)hexMap);      // [-0, +1, -]
     lua_pushinteger(L, width);                      // [-0, +1, -]
+    lua_pushinteger(L, length);                     // [-0, +1, -]
     lua_pushinteger(L, l);                          // [-0, +1, -]
-    lua_pushcclosure(L, getCircle<T>, 3);           // [-3, +1, -]
+    lua_pushcclosure(L, getCircle<T>, 4);           // [-3, +1, -]
 
     // Call the function and apply result to hex map
     lua_call(L, 5, 1);                              // [-6, +1, e]
@@ -548,7 +609,8 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
 
         // Generate list of adjacent points in hex map
         for (lua_Integer r = 1; r <= maxDepth; r++)
-            hexCircle(L, width, l, r, &circleBuffer[6*(r-1)*r/2], buffer_size);
+            hexCircle(L, width, length,
+                      l, r, &circleBuffer[6*(r-1)*r/2], buffer_size);
 
         // Apply rules to adjacent points
         for (lua_Integer al = 0; al < buffer_size; al++)
@@ -659,13 +721,6 @@ static int wfc__index_call(lua_State* L)          //// [-0, +1, m]
         else if (strcmp("bit", f) == 0)
         {
             lua_pushcclosure(L, bitVal<T>, 0);      // [-0, +1, -]
-            return 1;
-        }
-        else if(strcmp("circle", f) == 0)
-        {
-            lua_pushinteger(L, width);              // [-0, +1, -]
-            lua_pushinteger(L, maxDepth);           // [-0, +1, -]
-            lua_pushcclosure(L, getCircle<T>, 2);   // [-1, +1, -]
             return 1;
         }
         else
