@@ -204,14 +204,14 @@ function Test_HexMapHelper_function()
     if hx(0,-1) == 2 then found2 = idx end
     if hx(1,-1) == 2^26 then found3 = idx end
     if hx(1,0) == 2^4 then found4 = idx end
-    if hx(0,1) == 2^4 then found5 = idx end
-    if hx(-1,1) == 2^2 then found6 = idx end
-    if hx(-5,0) == 2^9 then foundXLoopLeft = idx end
-    if hx(-5,0) == 2^5 then foundXLoopRight = idx end
-    if hx(0,-5) == 2^8 then foundYLoopUp = idx end
-    if hx(0,5) == 2^9 then foundYLoopDown = idx end
-    if hx(0,-10) == 2^9 then foundULCorner = idx end
-    if hx(1,10) == 1 then foundLRCorner = idx end
+    if hx(0,1) == 2 then found5 = idx end
+    if hx(-1,1) == 2 then found6 = idx end
+    if hx(-5,0) == 2^3 then foundXLoopLeft = idx end
+    if hx(-5,0) == 2^6 then foundXLoopRight = idx end
+    if hx(0,-5) == 2^9 then foundYLoopUp = idx end
+    if hx(0,5) == 2^3 then foundYLoopDown = idx end
+    if hx(0,-10) == 2^3 then foundULCorner = idx end
+    if hx(0,10) == 1 then foundLRCorner = idx end
     -- io.write('['..idx..': '..hex_map.bit(hx(-1,0))..'], ')  -- ### DEBUG
     return 2^((idx-1)%120)
   end)
@@ -226,16 +226,16 @@ function Test_HexMapHelper_function()
   -- print()
   assert(found1 == 3, "Expected value of 3, actually "..tostring(found1))
   assert(found2 == 3, "Expected value of 3, actually "..tostring(found2))
-  assert(found3 == 28, "Expected value of 28, actually "..tostring(found3))
-  assert(found4 == 16, "Expected value of 16, actually "..tostring(found4))
-  assert(found5 == 35, "Expected value of 35, actually "..tostring(found5))
+  assert(found3 == 33, "Expected value of 33, actually "..tostring(found3))
+  assert(found4 == 21, "Expected value of 21, actually "..tostring(found4))
+  assert(found5 == 7, "Expected value of 7, actually "..tostring(found5))
   assert(found6 == 8, "Expected value of 8, actually "..tostring(found6))
-  assert(foundXLoopLeft == 25, "Expected value of 25, actually "..tostring(foundXLoopLeft))
-  assert(foundXLoopRight == 35, "Expected value of 35, actually "..tostring(foundXLoopRight))
-  assert(foundYLoopUp == 11, "Expected value of 11, actually "..tostring(foundYLoopUp))
-  assert(foundYLoopDown == 12, "Expected value of 12, actually "..tostring(foundYLoopDown))
-  assert(foundULCorner == 25, "Expected value of 25, actually "..tostring(foundULCorner))
-  assert(foundLRCorner == 13, "Expected value of 13, actually "..tostring(foundLRCorner))
+  assert(foundXLoopLeft == 35, "Expected value of 35, actually "..tostring(foundXLoopLeft))
+  assert(foundXLoopRight == 22, "Expected value of 22, actually "..tostring(foundXLoopRight))
+  assert(foundYLoopUp == 13, "Expected value of 13, actually "..tostring(foundYLoopUp))
+  assert(foundYLoopDown == 20, "Expected value of 20, actually "..tostring(foundYLoopDown))
+  assert(foundULCorner == 35, "Expected value of 35, actually "..tostring(foundULCorner))
+  assert(foundLRCorner == 5, "Expected value of 5, actually "..tostring(foundLRCorner))
 end
 
 function Test_Circle()

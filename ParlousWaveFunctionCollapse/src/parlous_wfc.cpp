@@ -174,36 +174,6 @@ static int genHexMapHelperFunc(lua_State* L)
 }
 
 template <typename T>
-static T maybeLoopX(lua_Integer l,
-                    lua_Integer old_l,
-                    lua_Integer width)
-{
-    if (l/width == old_l/width) return l;
-    if (l < old_l) return l + width;
-    if (l > old_l) return l - width;
-    return l;
-}
-
-template <typename T>
-static T maybeLoopY(lua_Integer l,
-                    lua_Integer old_l,
-                    lua_Integer length)
-{
-    if (l >= 0 && l < length) return l;
-    if (l < 0) return length - 1 - l;
-    else return l - length;
-}
-
-// template <typename T>
-// static T maybeLoop(lua_Integer l,
-//                    lua_Integer old_l,
-//                    lua_Integer length)
-// {
-//     l = maybeLoopY<T>(l, old_l, length);
-//     return maybeLoopX<T>(l, old_l, length);
-// }
-
-template <typename T>
 static int hexCircle(lua_State* L,
                      lua_Integer width,
                      lua_Integer length,
@@ -281,8 +251,8 @@ static int hexCircle(lua_State* L,
     // Bottom of hex
     for (lua_Integer c = 0; c < r; c++)
     {
-        circle[i] = maybeLoopX<T>(circle[i-1] - 1, circle[i-1], length);
-        // circle[i] = hxL(circle[i-1], width, length);
+        // circle[i] = maybeLoopX<T>(circle[i-1] - 1, circle[i-1], length);
+        circle[i] = hxL(circle[i-1], width, length);
         i++;
         // printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
