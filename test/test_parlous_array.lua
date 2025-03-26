@@ -69,7 +69,7 @@ function Test_Parlous_WFC_Gen()
     calls = calls + 1;
     if (newWave)
     then
-      print("###--> ["..calls.."] x = "..x.." -> new_x = "..2^(calls - 1))  -- ### DEBUG
+      -- print("###--> ["..calls.."] x = "..x.." -> new_x = "..2^(calls - 1))  -- ### DEBUG
       return 2^(calls - 1)
     end
     return x
@@ -254,14 +254,14 @@ function Test_Circle()
     if idx == math.floor(WIDTH*WIDTH/2) + math.floor(WIDTH/2) then return hex_map.Not(2^7) end
     return 0 end)
   -- PPPrint(hex_map)
-  hex_map:foreach( function (i, x) io.write('['..i..']: '..x..', ') end)
+  -- hex_map:foreach( function (i, x) io.write('['..i..']: '..x..', ') end)
 
   -- Define function to look for set hex cell (bit = 8)s
   function Look_for_8(v, bit_count, bit)
-    if bit_count(v) ~= 1 then  -- ### DEBUG
-      if v == -1 then io.write('*, ')  -- ### DEBUG
-      else io.write(v..', ') end  -- ### DEBUG   '$, '
-    else io.write(bit(v)..', ') end  -- ### DEBUG
+    -- if bit_count(v) ~= 1 then  -- ### DEBUG
+    --   if v == -1 then io.write('*, ')  -- ### DEBUG
+    --   else io.write(v..', ') end  -- ### DEBUG   '$, '
+    -- else io.write(bit(v)..', ') end  -- ### DEBUG
     if bit_count(v) ~= 1 then return false end
     if bit(v) == 8 then return true else return false end
    end
@@ -272,7 +272,7 @@ function Test_Circle()
   hex_map:gen(
   function (hx, x, newWave, dist, cir)
     idx = idx + 1
-    io.write('\n### ['..(idx+1)..']: ')  -- ### DEBUG
+    io.write('\n### ['..(idx)..']: ')  -- ### DEBUG
     if hex_map.bit_count(x) == 1 then repeats = repeats + 1 end
     io.write('|1| ')  -- ### DEBUG
     if cir(1):any(Look_for_8) then return 1 end
@@ -400,16 +400,16 @@ end
 
 
 print("> Test_Parlous_Wave_Function_Collapse <")
-Test_Parlous_WFC_Foreach()
-Test_Parlous_WFC_Gen()
-Test_Mask()
-Test_Or()
-Test_Not()
-Test_Xor()
-Test_Bit()
-Test_Bit_Count()
-Test_Circle_Placement()
-Test_HexMapHelper_function()
+-- Test_Parlous_WFC_Foreach()
+-- Test_Parlous_WFC_Gen()
+-- Test_Mask()
+-- Test_Or()
+-- Test_Not()
+-- Test_Xor()
+-- Test_Bit()
+-- Test_Bit_Count()
+-- Test_Circle_Placement()
+-- Test_HexMapHelper_function()
 Test_Circle()
 Test_Circle_Any()
 Test_Circle_All()

@@ -135,8 +135,10 @@ static T hx(lua_Integer idx, lua_Integer width, lua_Integer length,
     lua_Integer colDir = axialCol(q,r);
     if (colDir > 0 && idx%width >= (width - colDir))
         l = l - width;
+    // if (l >= 100) printf("\n###--> [%li]: q = %li, r = %li", l, (lua_Integer)q, (lua_Integer)r);  // ### DEBUG
     if (colDir < 0 && idx%width < -colDir)
         l = l + width;
+    // if (l >= 100) printf("\n###==> [%li]: q = %li, r = %li, _q = %li, _r = %li", l, (lua_Integer)q, (lua_Integer)r, _q, _r);  // ### DEBUG
 
     return l;
 }
@@ -168,7 +170,7 @@ static int genHexMapHelperFunc(lua_State* L)
 
     // Push return value onto stack
     lua_pushinteger(L, ~hexMap[l]);            // [-0, +1, -]
-    if (idx == 63) printf("### [63]: q = %li, r = %li, l = %li, value = %li\n", q, r, l, ~hexMap[l]);  // ### DEBUG
+    // if (idx == 32) printf("### [32]: q = %li, r = %li, l = %li, value = %li\n", q, r, l, ~hexMap[l]);  // ### DEBUG
 
     return 1;
 }
@@ -269,6 +271,8 @@ static int hexCircle(lua_State* L,
         // printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
     // printf("\n");  // ### DEBUG
+    for (lua_Integer c = 0; c < hexCircleLen; c++)      // ### DEBUG
+        printf("###$$> circle[%li] = %li @ %p\n", c, circle[c], &circle[c]);    // ### DEBUG
 
     return 0;
 }
@@ -459,8 +463,10 @@ static int getCircle(lua_State* L)                //// [-0, +1, m]
 
     // Replace indexes in cicrle buffer with values
     // FIXME Line 373 causes crash sometimes
-    for (lua_Integer i = 0; i < 6*r; i++)
+    for (lua_Integer i = 0; i < buffer_size; i++) {
         circleBuffer[i] = ~hexMap[circleBuffer[i]];
+        if (~hexMap[circleBuffer[i]] < 0) printf("###=== map[%li]=%li, c=%li, %p\n", circleBuffer[i], ~hexMap[circleBuffer[i]], i, &circleBuffer[i]);  // ### DEBUG
+    }
 
     // Define metatable
     wfc__defineCircleMetatable<T>(L,                // [-0, +0, m]
@@ -569,7 +575,7 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
     {
         // Periodically (yet unsynchronized) select cell on map
         lua_Integer l = fmod((prime*i), length);
-        // printf("----------<l = %lu>----------\n", l);  // ### DEBUG
+        printf("----------<l = %lu>----------\n", l);  // ### DEBUG
 
         // Check if cell has already completely collapsed the wave
         if (hexMap[l] != 0 && __countBits(~hexMap[l]) == 1) continue;
@@ -580,7 +586,7 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
         // Generate list of adjacent points in hex map
         for (lua_Integer r = 1; r <= maxDepth; r++)
             hexCircle(L, width, length,
-                      l, r, &circleBuffer[6*(r-1)*r/2], buffer_size);
+                      l, r, &circleBuffer[6*(r-1)*r/2], 6*r);
 
         // Apply rules to adjacent points
         for (lua_Integer al = 0; al < buffer_size; al++)
