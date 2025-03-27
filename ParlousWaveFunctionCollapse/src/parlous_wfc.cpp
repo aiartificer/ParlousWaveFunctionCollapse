@@ -139,6 +139,7 @@ static T hx(lua_Integer idx, lua_Integer width, lua_Integer length,
     if (colDir < 0 && idx%width < -colDir)
         l = l + width;
     // if (l >= 100) printf("\n###==> [%li]: q = %li, r = %li, _q = %li, _r = %li", l, (lua_Integer)q, (lua_Integer)r, _q, _r);  // ### DEBUG
+    if (l <= -1) printf(" !!%li!! ", l);  // ### DEBUG
 
     return l;
 }
@@ -465,7 +466,7 @@ static int getCircle(lua_State* L)                //// [-0, +1, m]
     // FIXME Line 373 causes crash sometimes
     for (lua_Integer i = 0; i < buffer_size; i++) {
         if (~hexMap[circleBuffer[i]] < -1) printf("###=== map[%li]=%li, c=%li, %p\n", circleBuffer[i], ~hexMap[circleBuffer[i]], i, &circleBuffer[i]);  // ### DEBUG
-        else printf("###=== .\n");  // ### DEBUG
+        // else printf("###=== .\n");  // ### DEBUG
         circleBuffer[i] = ~hexMap[circleBuffer[i]];
     }
 
@@ -576,7 +577,7 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
     {
         // Periodically (yet unsynchronized) select cell on map
         lua_Integer l = fmod((prime*i), length);
-        // printf("----------<l = %lu>----------\n", l);  // ### DEBUG
+        printf("----------<l = %lu>----------\n", l);  // ### DEBUG
 
         // Check if cell has already completely collapsed the wave
         if (hexMap[l] != 0 && __countBits(~hexMap[l]) == 1) continue;
