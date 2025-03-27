@@ -134,27 +134,12 @@ static T hx(lua_Integer idx, lua_Integer width, lua_Integer length,
 
     // Set l to new location
     lua_Integer l = even_axial_to_l(width, new_q, new_r);
-    // lua_Integer l = even_axial_to_l(width, _q+q, _r+r);
 
     // Loop around Y-axis
-    // lua_Integer preprel = l;  // ### DEBUG
     if (0 > l)
         l = length + l - width;
     if (length <= l)
         l = l + width - length;
-    // lua_Integer prel = l;  // ### DEBUG
-    
-    // // Loop around X-axis
-    // lua_Integer colDir = evenAxialCol(q,r);
-    // if (1 == (r&1)) colDir -= 1;
-    // if (colDir > 0 && idx%width >= (width - colDir))
-    //     l = l - width;
-    // if (l >= 100) printf("\n!!%li->%li->%li, colDir=%li, _q=%li, _r=%li, q=%li, r=%li, idx=%li!! ", preprel, prel, l, colDir, _q, _r, (lua_Integer)q, (lua_Integer)r, idx);  // ### DEBUG
-    // if (l <= -1) printf("\n!!%li->%li->%li, colDir=%li, _q=%li, _r=%li, q=%li, r=%li, idx=%li!! ", preprel, prel, l, colDir, _q, _r, (lua_Integer)q, (lua_Integer)r, idx);  // ### DEBUG
-    // if (colDir < 0 && idx%width < -colDir)
-    //     l = l + width;
-    // if (l >= 100) printf("\n!!%li->%li->%li, colDir=%li, _q=%li, _r=%li, q=%li, r=%li, idx=%li!! ", preprel, prel, l, colDir, _q, _r, (lua_Integer)q, (lua_Integer)r, idx);  // ### DEBUG
-    // if (l <= -1) printf("\n!!%li->%li->%li, colDir=%li, _q=%li, _r=%li, q=%li, r=%li, idx=%li!! ", preprel, prel, l, colDir, _q, _r, (lua_Integer)q, (lua_Integer)r, idx);  // ### DEBUG
 
     return l;
 }
