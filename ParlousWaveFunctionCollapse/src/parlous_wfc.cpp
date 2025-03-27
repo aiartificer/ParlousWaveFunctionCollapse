@@ -202,93 +202,52 @@ static int hexCircle(lua_State* L,
 {
     if (hexCircleLen < 6*r)
         return luaL_error(L, "Size allocated for hexCircle too small: need=%d, allocated=%d)", 6*r, hexCircleLen);\
-    // lua_Integer q = luaL_checkinteger(L, -2);
-    // lua_Integer r = luaL_checkinteger(L, -1);
-    // lua_Integer _r = Y(l, width);
-    // lua_Integer _q = X(l, width) - (_r + (_r&1))/2;
     
     // Start directly left of point
     size_t i = 0;
     circle[i++] = hx<lua_Integer>(l, width, length, -r, 0);
-    // circle[i++] = maybeLoopX<T>(l - r, l, length);
-    // printf("\n### maybeLoop(%li, %li, %li, %li): %li", l-r, r, l, length, circle[i-1]);  // ### DEBUG
-    // printf("\n###==> %li: %d && %d: %d", length, (l-r) >= 0, (l-r) < length, (l-r) < 0);  // ### DEBUG
-    // printf("##########\n[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
 
     // Upper left of hex
-    // even_axial_to_l(width, q, r)
     for (lua_Integer c = 0; c < r; c++)
     {
-        // _r = Y(circle[i-1], width);
-        // _q = X(circle[i-1], width) - (_r + (_r&1))/2;
-        // circle[i] = even_axial_to_l(width, _q+1, _r-1);
-        // if (l < width)
-        //     circle[i] = circle[i-1] + length - width + (row(circle[i-1], width)%2 == 0 ? 1 : 0);
-        // else
-        // circle[i] = circle[i-1] - width + (row(circle[i-1], width)%2 == 0 ? 1 : 0);
         circle[i] = hxUR(circle[i-1], width, length);
-        // if (circle[i] != (circle[i-1] - width + (row(circle[i-1], width)%2 == 0 ? 1 : 0)))  // ### DEBUG
-        //     printf("###### %li !== %li\n", circle[i], (circle[i-1] - width + (row(circle[i-1], width)%2 == 0 ? 1 : 0)));  // ### DEBUG
         i++;
-        // printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
 
     // Top of hex
     for (lua_Integer c = 0; c < r; c++)
     {
-        // circle[i] = maybeLoopX<T>(circle[i-1] + 1, circle[i-1], length);
         circle[i] = hxR(circle[i-1], width, length);
         i++;
-        // printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
 
     // Upper right of hex
     for (lua_Integer c = 0; c < r; c++)
     {
-        // _r = Y(circle[i-1], width);
-        // _q = X(circle[i-1], width) - (_r + (_r&1))/2;
-        // circle[i] = even_axial_to_l(width, _q, _r+1);
-        // circle[i] = circle[i-1] + width + (row(circle[i-1], width)%2 == 0 ? 1 : 0);
         circle[i] = hxDR(circle[i-1], width, length);
         i++;
-        // printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
 
     // Lower right of hex
     for (lua_Integer c = 0; c < r; c++)
     {
-        // _r = Y(circle[i-1], width);
-        // _q = X(circle[i-1], width) - (_r + (_r&1))/2;
-        // circle[i] = even_axial_to_l(width, _q-1, _r+1);
-        // circle[i] = circle[i-1] + width - (row(circle[i-1], width)%2 == 0 ? 0 : 1);
         circle[i] = hxDL(circle[i-1], width, length);
         i++;
-        // printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
 
     // Bottom of hex
     for (lua_Integer c = 0; c < r; c++)
     {
-        // circle[i] = maybeLoopX<T>(circle[i-1] - 1, circle[i-1], length);
         circle[i] = hxL(circle[i-1], width, length);
         i++;
-        // printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
 
     // Lower left of hex
     for (lua_Integer c = 0; c < r - 1; c++)
     {
-        // _r = Y(circle[i-1], width);
-        // _q = X(circle[i-1], width) - (_r + (_r&1))/2;
-        // circle[i] = even_axial_to_l(width, _q, _r-1);
-        // circle[i] = circle[i-1] - width - (row(circle[i-1], width)%2 == 0 ? 0 : 1);
         circle[i] = hxUL(circle[i-1], width, length);
         i++;
-        // printf("[%lu] \t l = %lu \t r = %lu, {%lu}, \t ", (i-1), l, r, circle[i-1]);  // ### DEBUG
     }
-    // printf("\n");  // ### DEBUG
-    // for (lua_Integer c = 0; c < hexCircleLen; c++)      // ### DEBUG
-    //     printf("###$$> circle[%li] = %li @ %p\n", c, circle[c], &circle[c]);    // ### DEBUG
 
     return 0;
 }
@@ -592,7 +551,7 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
     {
         // Periodically (yet unsynchronized) select cell on map
         lua_Integer l = fmod((prime*i), length);
-        printf("\n----------<l = %lu>----------", l);  // ### DEBUG
+        printf("\n----------<l = %li>----------", l);  // ### DEBUG
 
         // Check if cell has already completely collapsed the wave
         if (hexMap[l] != 0 && __countBits(~hexMap[l]) == 1) continue;
@@ -606,8 +565,9 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
                       l, r, &circleBuffer[6*(r-1)*r/2], 6*r);
 
         // Apply rules to adjacent points
-        for (lua_Integer al = 0; al < buffer_size; al++)
-            updateDomainAtPoint(L, length, width, hexMap, circleBuffer[al], false);
+        for (lua_Integer al = 0; al < buffer_size; al++) {
+            printf("\n  +-------<l = %li>----------\t[%li]", circleBuffer[al], al);  // ### DEBUG
+            updateDomainAtPoint(L, length, width, hexMap, circleBuffer[al], false);}
     }
     lua_pop(L, 2);                                  // [-2, +0, -]
 

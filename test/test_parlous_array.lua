@@ -1,7 +1,7 @@
 --local parray = require("ParlousArray/ParlousArray")
 
 function Setup_Hex_Map(length, type_size)
-  local arr = parlous_wfc.new_hex_map(length, type_size, 10, 5, 17)
+  local arr = parlous_wfc.new_hex_map(length, type_size, 6, 5, 17)
   print("-- parlous_wfc -------------------------")
   for k,v in pairs(getmetatable(arr)) do print(k,v) end
   print("----------------------------------------")
@@ -11,7 +11,7 @@ end
 
 function Test_Parlous_WFC_Foreach()
   print("\n\nTest_Parlous_WFC_Foreach")
-  local hex_map = Setup_Hex_Map(10, 8)
+  local hex_map = Setup_Hex_Map(36, 8)
   hex_map[1] = 1; hex_map[2] = 2; hex_map[3] = 3; hex_map[4] = 4; hex_map[5] = 5;
   hex_map[6] = 6; hex_map[7] = 7; hex_map[8] = 8; hex_map[9] = 9; hex_map[0] = 10;
   print("-----<>------")  -- ### DEBUG
@@ -85,7 +85,7 @@ end
 
 function Test_Mask()
   print("\n\nTest_Mask")
-  local hex_map = Setup_Hex_Map(10, 8)
+  local hex_map = Setup_Hex_Map(36, 8)
   hex_map[1] = 1; hex_map[2] = 2; hex_map[3] = 3; hex_map[4] = 4; hex_map[5] = 5;
   hex_map[6] = 6; hex_map[7] = 7; hex_map[8] = 8; hex_map[9] = 9; hex_map[0] = 10;
   assert(hex_map:mask(1, hex_map[1]) > 0, "Expected value of 1, actually "..tostring(hex_map:mask(1, hex_map[1])))
@@ -99,7 +99,7 @@ end
 
 function Test_Or()
   print("\n\nTest_Or")
-  local hex_map = Setup_Hex_Map(10, 8)
+  local hex_map = Setup_Hex_Map(36, 8)
   hex_map[1] = 1; hex_map[2] = 2; hex_map[3] = 3; hex_map[4] = 4; hex_map[5] = 5;
   hex_map[6] = 6; hex_map[7] = 7; hex_map[8] = 8; hex_map[9] = 9; hex_map[0] = 10;
   assert(hex_map:Or(1, hex_map[1]) == 1, "Expected value of 1, actually "..tostring(hex_map:Or(1, hex_map[1])))
@@ -113,7 +113,7 @@ end
 
 function Test_Not()
   print("\n\nTest_Not")
-  local hex_map = Setup_Hex_Map(10, 8)
+  local hex_map = Setup_Hex_Map(36, 8)
   hex_map[1] = 1; hex_map[2] = 2; hex_map[3] = 3; hex_map[4] = 4; hex_map[5] = 5;
   hex_map[6] = 6; hex_map[7] = 7; hex_map[8] = 8; hex_map[9] = 9; hex_map[0] = 10;
   assert(hex_map:Not(hex_map[3]) == -4, "Expected value of -4, actually "..tostring(hex_map:Not(8, hex_map[8])))
@@ -123,7 +123,7 @@ end
 
 function Test_Xor()
   print("\n\nTest_Xor")
-  local hex_map = Setup_Hex_Map(10, 8)
+  local hex_map = Setup_Hex_Map(36, 8)
   hex_map[1] = 1; hex_map[2] = 2; hex_map[3] = 3; hex_map[4] = 4; hex_map[5] = 5;
   hex_map[6] = 6; hex_map[7] = 7; hex_map[8] = 8; hex_map[9] = 9; hex_map[0] = 10;
   assert(hex_map:Xor(1, hex_map[1]) == 0, "Expected value of 0, actually "..tostring(hex_map:Xor(1, hex_map[1])))
@@ -136,7 +136,7 @@ end
 
 function Test_Bit()
   print("\n\nTest_Bit")
-  local hex_map = Setup_Hex_Map(10, 8)
+  local hex_map = Setup_Hex_Map(36, 8)
   hex_map[1] = 1; hex_map[2] = 2; hex_map[3] = 3; hex_map[4] = 4; hex_map[5] = 5;
   hex_map[6] = 6; hex_map[7] = 8; hex_map[8] = 7; hex_map[9] = 9; hex_map[0] = 10;
   assert(hex_map.bit(hex_map[1]) == 1, "Expected value of 1, actually "..tostring(hex_map:bit(hex_map[1])))
@@ -146,7 +146,7 @@ end
 
 function Test_Bit_Count()
   print("\n\nTest_Bit_Count")
-  local hex_map = Setup_Hex_Map(10, 8)
+  local hex_map = Setup_Hex_Map(36, 8)
   hex_map[1] = 1; hex_map[2] = 2; hex_map[3] = 3; hex_map[4] = 4; hex_map[5] = 5;
   hex_map[6] = 6; hex_map[7] = 8; hex_map[8] = 7; hex_map[9] = 9; hex_map[0] = 10;
   assert(hex_map.bit_count(hex_map[1]) == 1, "Expected value of 1, actually "..tostring(hex_map:bit_count(hex_map[1])))
@@ -170,7 +170,7 @@ function Test_Circle_Placement()
     idx = idx + 1
     return 2^((idx-1)%120)
   end)
-  Even_PPPrint(hex_map, 10)
+  Even_PPPrint(hex_map, 6)
   -- hex_map:foreach(
   --   function (i, x)
   --     if i % 10 == 0 then io.write('\n') end
@@ -182,7 +182,7 @@ end
 
 function Test_HexMapHelper_function()
   print("\n\nTest_HexMapHelper_function")
-  local hex_map = Setup_Hex_Map(100, 8)
+  local hex_map = Setup_Hex_Map(36, 8)
   hex_map:map(function (x) return 0 end)
   local idx = 0
   local found1 = 0
@@ -217,7 +217,7 @@ function Test_HexMapHelper_function()
     -- io.write('['..idx..': '..hex_map.bit(hx(-1,0))..'], ')  -- ### DEBUG
     return 2^((idx-1)%120)
   end)
-  Even_PPPrint(hex_map, 10)
+  Even_PPPrint(hex_map, 6)
   -- PPPrint(hex_map)
   -- hex_map:foreach(
   --   function (i, x)
@@ -244,7 +244,7 @@ end
 function Test_Circle()
   print("\n\nTest_Circle")
   print("----------------------------------------")
-  local WIDTH = 10 -- 12 -- 20
+  local WIDTH = 6 -- 12 -- 20
 
   -- Initialize hex_map
   local hex_map = parlous_wfc.new_hex_map(WIDTH*WIDTH, 8, WIDTH, 5, 17)
@@ -324,7 +324,7 @@ function Test_Circle_Any()
     end) then foundAny3 = foundAny3 + 1 end
     return 4
   end)
-  Even_PPPrint(hex_map, 10)
+  Even_PPPrint(hex_map, 6)
   -- PPPrint(hex_map)
   print("foundAny1 = "..foundAny1)  -- ### DEBUG
   assert(foundAny1 == 5, "Expected value of 5, actually "..tostring(foundAny1))
@@ -368,7 +368,7 @@ function Test_Gen_NewWave_Selection()
     end
     return x
   end)
-  Even_PPPrint(hex_map, 10)
+  Even_PPPrint(hex_map, 6)
   -- hex_map:pprint()
   assert(hex_map[34] == -2, "Expected value of -2, actually "..tostring(hex_map[34]))
   assert(hex_map[22] == -3, "Expected value of -3, actually "..tostring(hex_map[22]))
