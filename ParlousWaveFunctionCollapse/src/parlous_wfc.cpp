@@ -120,35 +120,50 @@ template <typename T>
 static T hx(lua_Integer idx, lua_Integer width, lua_Integer length,
             T q, T r)
 {
-    // Set l to new location
     lua_Integer _r = Y(idx, width);
     lua_Integer _q = X(idx, width) - (_r + (_r&1))/2;
-    lua_Integer l = even_axial_to_l(width, _q+q, _r+r);
+    lua_Integer new_q = _q + q;
+    lua_Integer new_r = _r + r;
+    lua_Integer newCol = evenAxialCol(new_q, new_r);
+
+    // Determine if off edge of map and need to loop around
+    if (newCol < 0)
+        new_q += width;
+    if (newCol > width)
+        new_q -= width;
+
+    // Set l to new location
+    lua_Integer l = even_axial_to_l(width, new_q, new_r);
+    // lua_Integer l = even_axial_to_l(width, _q+q, _r+r);
 
     // Loop around Y-axis
+    // lua_Integer preprel = l;  // ### DEBUG
     if (0 > l)
-        l = length + l;
+        l = length + l - width;
     if (length <= l)
-        l = l - length;
+        l = l + width - length;
+    // lua_Integer prel = l;  // ### DEBUG
     
-    // Loop around X-axis
-    lua_Integer colDir = axialCol(q,r);
-    if (colDir > 0 && idx%width >= (width - colDir))
-        l = l - width;
-    // if (l >= 100) printf("\n###--> [%li]: q = %li, r = %li", l, (lua_Integer)q, (lua_Integer)r);  // ### DEBUG
-    if (colDir < 0 && idx%width < -colDir)
-        l = l + width;
-    // if (l >= 100) printf("\n###==> [%li]: q = %li, r = %li, _q = %li, _r = %li", l, (lua_Integer)q, (lua_Integer)r, _q, _r);  // ### DEBUG
-    if (l <= -1) printf(" !!%li!! ", l);  // ### DEBUG
+    // // Loop around X-axis
+    // lua_Integer colDir = evenAxialCol(q,r);
+    // if (1 == (r&1)) colDir -= 1;
+    // if (colDir > 0 && idx%width >= (width - colDir))
+    //     l = l - width;
+    // if (l >= 100) printf("\n!!%li->%li->%li, colDir=%li, _q=%li, _r=%li, q=%li, r=%li, idx=%li!! ", preprel, prel, l, colDir, _q, _r, (lua_Integer)q, (lua_Integer)r, idx);  // ### DEBUG
+    // if (l <= -1) printf("\n!!%li->%li->%li, colDir=%li, _q=%li, _r=%li, q=%li, r=%li, idx=%li!! ", preprel, prel, l, colDir, _q, _r, (lua_Integer)q, (lua_Integer)r, idx);  // ### DEBUG
+    // if (colDir < 0 && idx%width < -colDir)
+    //     l = l + width;
+    // if (l >= 100) printf("\n!!%li->%li->%li, colDir=%li, _q=%li, _r=%li, q=%li, r=%li, idx=%li!! ", preprel, prel, l, colDir, _q, _r, (lua_Integer)q, (lua_Integer)r, idx);  // ### DEBUG
+    // if (l <= -1) printf("\n!!%li->%li->%li, colDir=%li, _q=%li, _r=%li, q=%li, r=%li, idx=%li!! ", preprel, prel, l, colDir, _q, _r, (lua_Integer)q, (lua_Integer)r, idx);  // ### DEBUG
 
     return l;
 }
-#define hxL(idx, width, length) hx(idx, width, length, -1, 0)
-#define hxUL(idx, width, length) hx(idx, width, length, -0, -1)
-#define hxUR(idx, width, length) hx(idx, width, length, 1, -1)
-#define hxR(idx, width, length) hx(idx, width, length, 1, 0)
-#define hxDR(idx, width, length) hx(idx, width, length, 0, 1)
-#define hxDL(idx, width, length) hx(idx, width, length, -1, 1)
+#define hxL(idx, width, length) hx(idx, width, length, (lua_Integer)-1, (lua_Integer)0)
+#define hxUL(idx, width, length) hx(idx, width, length, (lua_Integer)-0, (lua_Integer)-1)
+#define hxUR(idx, width, length) hx(idx, width, length, (lua_Integer)1, (lua_Integer)-1)
+#define hxR(idx, width, length) hx(idx, width, length, (lua_Integer)1, (lua_Integer)0)
+#define hxDR(idx, width, length) hx(idx, width, length, (lua_Integer)0, (lua_Integer)1)
+#define hxDL(idx, width, length) hx(idx, width, length, (lua_Integer)-1, (lua_Integer)1)
 
 template <typename T>
 static int genHexMapHelperFunc(lua_State* L)
@@ -577,7 +592,7 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
     {
         // Periodically (yet unsynchronized) select cell on map
         lua_Integer l = fmod((prime*i), length);
-        printf("----------<l = %lu>----------\n", l);  // ### DEBUG
+        printf("\n----------<l = %lu>----------", l);  // ### DEBUG
 
         // Check if cell has already completely collapsed the wave
         if (hexMap[l] != 0 && __countBits(~hexMap[l]) == 1) continue;
