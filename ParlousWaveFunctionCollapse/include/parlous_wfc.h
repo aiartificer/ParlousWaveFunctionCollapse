@@ -23,7 +23,8 @@ extern "C"{
 #define axialRow(q,r) (r)
 #define X(l,c) (l%c)
 #define col(l,c) (l%c)
-#define axialCol(q,r) (q + (r + (r&1))/2)
+#define evenAxialCol(q,r) (q + (r + (r&1))/2)
+#define oddAxialCol(q,r) (q - (r + (r&1))/2)
 #define even_axial_to_l(w, q, r) (q + (r + ((r)&1))/2 + (w)*(r))
 
 
