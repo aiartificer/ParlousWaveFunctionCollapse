@@ -1,7 +1,7 @@
 #ifndef PARLOUS_WFC_H_INCLUDED
 #define PARLOUS_WFC_H_INCLUDED
 
-#define REGION_SIZE 5
+#define REGION_SIZE 0
 
 #include "indefold.h"
 // Replace below lua includes with "#include <dmsdk/sdk.h>" when using in Defold
