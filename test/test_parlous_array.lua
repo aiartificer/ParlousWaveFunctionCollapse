@@ -258,10 +258,10 @@ function Test_Circle()
 
   -- Define function to look for set hex cell (bit = 8)s
   function Look_for_8(v, bit_count, bit)
-    -- if bit_count(v) ~= 1 then  -- ### DEBUG
-    --   if v == -1 then io.write('*, ')  -- ### DEBUG
-    --   else io.write(v..', ') end  -- ### DEBUG   '$, '
-    -- else io.write(bit(v)..', ') end  -- ### DEBUG
+    if bit_count(v) ~= 1 then  -- ### DEBUG
+      if v == -1 then io.write('*, ')  -- ### DEBUG
+      else io.write(v..', ') end  -- ### DEBUG   '$, '
+    else io.write(bit(v)..', ') end  -- ### DEBUG
     if bit_count(v) ~= 1 then return false end
     if bit(v) == 8 then return true else return false end
    end
