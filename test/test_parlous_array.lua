@@ -311,7 +311,7 @@ function Test_Circle_Any()
   local foundAny3 = 0
   hex_map:gen(function (hx, x, newWave, dist, cir)
     idx = idx + 1
-    if idx == 8 then return 8 end
+    if idx == 6 then return 8 end
     if cir(1):any(function(v, bit_count, bit)
       if bit_count(v) ~= 1 then return false end
       -- print("bit(v) = "..bit(v).."\tv = "..v)  -- ### DEBUG
@@ -331,11 +331,11 @@ function Test_Circle_Any()
   Even_PPPrint(hex_map, 10)
   -- PPPrint(hex_map)
   print("foundAny1 = "..foundAny1)  -- ### DEBUG
-  assert(foundAny1 == 5, "Expected value of 5, actually "..tostring(foundAny1))
+  assert(foundAny1 == 4, "Expected value of 4, actually "..tostring(foundAny1))
   print("foundAny2 = "..foundAny2)  -- ### DEBUG
-  assert(foundAny2 == 8, "Expected value of 8, actually "..tostring(foundAny2))
+  assert(foundAny2 == 9, "Expected value of 9, actually "..tostring(foundAny2))
   print("foundAny3 = "..foundAny3)  -- ### DEBUG
-  assert(foundAny3 == 8, "Expected value of 8, actually "..tostring(foundAny3))
+  assert(foundAny3 == 18, "Expected value of 18, actually "..tostring(foundAny3))
 end
 
 function Test_Circle_All()
@@ -347,14 +347,15 @@ function Test_Circle_All()
   local foundAll2 = 0
   hex_map:gen(function (hx, x, newWave, dist, cir)
     idx = idx + 1
-    if idx == 8 then return 8 end
+    if idx == 6 then return 8 end
     if cir(1):all(function(v, bit_count, bit)
       if bit_count(v) ~= 1 then return false end
       if bit(v) == 4 then return true else return false end
     end) then foundAll1 = foundAll1 + 1 end
     return 4
   end)
-  PPPrint(hex_map); print()
+  -- PPPrint(hex_map); print()
+  Even_PPPrint(hex_map, 10)
   print("foundAll1 = "..foundAll1)  -- ### DEBUG
   assert(foundAll1 == 36, "Expected value of 36, actually "..tostring(foundAll1))
 end
