@@ -429,7 +429,7 @@ static int getCircle(lua_State* L)                //// [-0, +1, m]
     // Replace indexes in cicrle buffer with values
     // FIXME Line 373 causes crash sometimes
     for (lua_Integer i = 0; i < buffer_size; i++) {
-        if (~hexMap[circleBuffer[i]] < -1) printf("###=== map[%li]=%li, c=%li, %p\n", circleBuffer[i], ~hexMap[circleBuffer[i]], i, &circleBuffer[i]);  // ### DEBUG
+        // if (~hexMap[circleBuffer[i]] < -1) printf("###=== map[%li]=%li, c=%li, %p\n", circleBuffer[i], ~hexMap[circleBuffer[i]], i, &circleBuffer[i]);  // ### DEBUG
         // else printf("###=== .\n");  // ### DEBUG
         circleBuffer[i] = ~hexMap[circleBuffer[i]];
     }
@@ -541,14 +541,14 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
     {
         // Periodically (yet unsynchronized) select cell on map
         lua_Integer l = fmod((prime*i), length);
-        printf("\n----------<l = %li>----------", l);  // ### DEBUG
+        // printf("\n----------<l = %li>----------", l);  // ### DEBUG
 
         // Check if cell has already completely collapsed the wave
         if (hexMap[l] != 0 && __countBits(~hexMap[l]) == 1) continue;
         
         // Update domain at present point
         updateDomainAtPoint(L, length, width, hexMap, l, true);
-        printf("\n----wave--------------------");  // ### DEBUG
+        // printf("\n----wave--------------------");  // ### DEBUG
 
         // Generate list of adjacent points in hex map
         for (lua_Integer r = 1; r <= maxDepth; r++)
@@ -557,7 +557,7 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
 
         // Apply rules to adjacent points
         for (lua_Integer al = 0; al < buffer_size; al++) {
-            printf("\n  +-------<l = %li>----------\t[%li]", circleBuffer[al], al+2);  // ### DEBUG
+            // printf("\n  +-------<l = %li>----------\t[%li]", circleBuffer[al], al+2);  // ### DEBUG
             updateDomainAtPoint(L, length, width, hexMap, circleBuffer[al], false);}
     }
     lua_pop(L, 2);                                  // [-2, +0, -]

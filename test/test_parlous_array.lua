@@ -11,11 +11,10 @@ end
 
 function Test_Parlous_WFC_Foreach()
   print("\n\nTest_Parlous_WFC_Foreach")
-  local hex_map = Setup_Hex_Map(36, 8)
+  local hex_map = Setup_Hex_Map(12, 8)
   hex_map[1] = 1; hex_map[2] = 2; hex_map[3] = 3; hex_map[4] = 4; hex_map[5] = 5;
   hex_map[6] = 6; hex_map[7] = 7; hex_map[8] = 8; hex_map[9] = 9; hex_map[0] = 10;
-  print("-----<>------")  -- ### DEBUG
-  print(hex_map[0])  -- ### DEBUG
+  hex_map[10] = 10; hex_map[11] = 11;
   assert(hex_map[0] == 10, "Expected hex_map[0]=10, actually hex_map[0]="..tostring(hex_map[0]))
   print("hex_map[0] = "..tostring(hex_map[0]))
   assert(hex_map[9] == 9, "Expected hex_map[9]=9, actually hex_map[9]="..tostring(hex_map[9]))
@@ -23,7 +22,7 @@ function Test_Parlous_WFC_Foreach()
   local sum = 0
   hex_map:foreach(function (i, x) sum = sum + x end)
   print("sum = "..tostring(sum))
-  assert(sum == 55, "Expected sum=55, actually sum="..tostring(sum))
+  assert(sum == 76, "Expected sum=76, actually sum="..tostring(sum))
 end
 
 function PPPrint(hex_map)
@@ -258,10 +257,10 @@ function Test_Circle()
 
   -- Define function to look for set hex cell (bit = 8)s
   function Look_for_8(v, bit_count, bit)
-    if bit_count(v) ~= 1 then  -- ### DEBUG
-      if v == -1 then io.write('*, ')  -- ### DEBUG
-      else io.write(v..', ') end  -- ### DEBUG   '$, '
-    else io.write(bit(v)..', ') end  -- ### DEBUG
+    -- if bit_count(v) ~= 1 then  -- ### DEBUG
+    --   if v == -1 then io.write('*, ')  -- ### DEBUG
+    --   else io.write(v..', ') end  -- ### DEBUG   '$, '
+    -- else io.write(bit(v)..', ') end  -- ### DEBUG
     if bit_count(v) ~= 1 then return false end
     if bit(v) == 8 then return true else return false end
    end
@@ -272,17 +271,17 @@ function Test_Circle()
   hex_map:gen(
   function (hx, x, newWave, dist, cir)
     idx = idx + 1
-    io.write('\n### ['..(idx)..']: ')  -- ### DEBUG
+    -- io.write('\n### ['..(idx)..']: ')  -- ### DEBUG
     if hex_map.bit_count(x) == 1 then repeats = repeats + 1 end
-    io.write('|1| ')  -- ### DEBUG
+    -- io.write('|1| ')  -- ### DEBUG
     if cir(1):any(Look_for_8) then return 1 end
-    io.write('|2| ')  -- ### DEBUG
+    -- io.write('|2| ')  -- ### DEBUG
     if cir(2):any(Look_for_8) then return 2 end
-    io.write('|3| ')  -- ### DEBUG
+    -- io.write('|3| ')  -- ### DEBUG
     if cir(3):any(Look_for_8) then return 4 end
-    io.write('\n --\t|4| ')  -- ### DEBUG
+    -- io.write('\n --\t|4| ')  -- ### DEBUG
     if cir(4):any(Look_for_8) then return 8 end
-    io.write('\n --\t|5| ')  -- ### DEBUG
+    -- io.write('\n --\t|5| ')  -- ### DEBUG
     if cir(5):any(Look_for_8) then return 16 end
     return 32
   end)
@@ -400,18 +399,18 @@ end
 
 
 print("> Test_Parlous_Wave_Function_Collapse <")
--- Test_Parlous_WFC_Foreach()
--- Test_Parlous_WFC_Gen()
--- Test_Mask()
--- Test_Or()
--- Test_Not()
--- Test_Xor()
--- Test_Bit()
--- Test_Bit_Count()
--- Test_Circle_Placement()
+Test_Parlous_WFC_Foreach()
+Test_Parlous_WFC_Gen()
+Test_Mask()
+Test_Or()
+Test_Not()
+Test_Xor()
+Test_Bit()
+Test_Bit_Count()
+Test_Circle_Placement()
 Test_HexMapHelper_function()
 Test_Circle()
--- Test_Circle_Any()
--- Test_Circle_All()
--- Test_Gen_NewWave_Selection()
--- Test_Parlous_WFC_Gen_Time()
+Test_Circle_Any()
+Test_Circle_All()
+Test_Gen_NewWave_Selection()
+Test_Parlous_WFC_Gen_Time()
