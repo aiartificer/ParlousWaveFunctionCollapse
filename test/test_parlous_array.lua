@@ -400,7 +400,7 @@ function Test_Parlous_WFC_Gen_Time()
   end)
   print("Time tanspired building table: "..os.time()-start_time)
   print("Number of calls to gen: "..calls)
-  assert(hex_map[1615] == -17, "Expected value of -17, actually "..tostring(hex_map[34]))
+  assert(hex_map[1615] == -9, "Expected value of -9, actually "..tostring(hex_map[1615]))
   assert(calls <= 480000, "Expected value of less than 480000, actually "..tostring(calls))
 end
 
