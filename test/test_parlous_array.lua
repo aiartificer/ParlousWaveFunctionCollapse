@@ -1,7 +1,7 @@
 --local parray = require("ParlousArray/ParlousArray")
 
-function Setup_Hex_Map(length, type_size)
-  local arr = parlous_wfc.new_hex_map(length, type_size, 6, 5, 17)
+function Setup_Hex_Map(length, width, type_size)
+  local arr = parlous_wfc.new_hex_map(length, type_size, width, 5, 17)
   print("-- parlous_wfc -------------------------")
   for k,v in pairs(getmetatable(arr)) do print(k,v) end
   print("----------------------------------------")
@@ -11,7 +11,7 @@ end
 
 function Test_Parlous_WFC_Foreach()
   print("\n\nTest_Parlous_WFC_Foreach")
-  local hex_map = Setup_Hex_Map(12, 8)
+  local hex_map = Setup_Hex_Map(12, 6, 8)
   hex_map[1] = 1; hex_map[2] = 2; hex_map[3] = 3; hex_map[4] = 4; hex_map[5] = 5;
   hex_map[6] = 6; hex_map[7] = 7; hex_map[8] = 8; hex_map[9] = 9; hex_map[0] = 10;
   hex_map[10] = 10; hex_map[11] = 11;
@@ -57,7 +57,7 @@ end
 
 function Test_Parlous_WFC_Gen()
   print("\n\nTest_Parlous_WFC_Gen")
-  local hex_map = Setup_Hex_Map(80, 8)
+  local hex_map = Setup_Hex_Map(80, 10, 8)
   hex_map:map(function (x) return 0 end)
   local calls = 0
   hex_map:gen(function (hx, x, newWave, dist)
@@ -78,13 +78,14 @@ function Test_Parlous_WFC_Gen()
     -- if hex_map:mask(2, hx(0, 1)) == 1 then return 2^2 end
     -- return 2^3
   end)
-  hex_map:pprint()
+  -- hex_map:pprint()
+  Even_PPPrint(hex_map, 10)
   print("Number of calls to gen: "..calls)
 end
 
 function Test_Mask()
   print("\n\nTest_Mask")
-  local hex_map = Setup_Hex_Map(36, 8)
+  local hex_map = Setup_Hex_Map(36, 6, 8)
   hex_map[1] = 1; hex_map[2] = 2; hex_map[3] = 3; hex_map[4] = 4; hex_map[5] = 5;
   hex_map[6] = 6; hex_map[7] = 7; hex_map[8] = 8; hex_map[9] = 9; hex_map[0] = 10;
   assert(hex_map:mask(1, hex_map[1]) > 0, "Expected value of 1, actually "..tostring(hex_map:mask(1, hex_map[1])))
@@ -98,7 +99,7 @@ end
 
 function Test_Or()
   print("\n\nTest_Or")
-  local hex_map = Setup_Hex_Map(36, 8)
+  local hex_map = Setup_Hex_Map(36, 6, 8)
   hex_map[1] = 1; hex_map[2] = 2; hex_map[3] = 3; hex_map[4] = 4; hex_map[5] = 5;
   hex_map[6] = 6; hex_map[7] = 7; hex_map[8] = 8; hex_map[9] = 9; hex_map[0] = 10;
   assert(hex_map:Or(1, hex_map[1]) == 1, "Expected value of 1, actually "..tostring(hex_map:Or(1, hex_map[1])))
@@ -112,7 +113,7 @@ end
 
 function Test_Not()
   print("\n\nTest_Not")
-  local hex_map = Setup_Hex_Map(36, 8)
+  local hex_map = Setup_Hex_Map(36, 6, 8)
   hex_map[1] = 1; hex_map[2] = 2; hex_map[3] = 3; hex_map[4] = 4; hex_map[5] = 5;
   hex_map[6] = 6; hex_map[7] = 7; hex_map[8] = 8; hex_map[9] = 9; hex_map[0] = 10;
   assert(hex_map:Not(hex_map[3]) == -4, "Expected value of -4, actually "..tostring(hex_map:Not(8, hex_map[8])))
@@ -122,7 +123,7 @@ end
 
 function Test_Xor()
   print("\n\nTest_Xor")
-  local hex_map = Setup_Hex_Map(36, 8)
+  local hex_map = Setup_Hex_Map(36, 6, 8)
   hex_map[1] = 1; hex_map[2] = 2; hex_map[3] = 3; hex_map[4] = 4; hex_map[5] = 5;
   hex_map[6] = 6; hex_map[7] = 7; hex_map[8] = 8; hex_map[9] = 9; hex_map[0] = 10;
   assert(hex_map:Xor(1, hex_map[1]) == 0, "Expected value of 0, actually "..tostring(hex_map:Xor(1, hex_map[1])))
@@ -135,7 +136,7 @@ end
 
 function Test_Bit()
   print("\n\nTest_Bit")
-  local hex_map = Setup_Hex_Map(36, 8)
+  local hex_map = Setup_Hex_Map(36, 6, 8)
   hex_map[1] = 1; hex_map[2] = 2; hex_map[3] = 3; hex_map[4] = 4; hex_map[5] = 5;
   hex_map[6] = 6; hex_map[7] = 8; hex_map[8] = 7; hex_map[9] = 9; hex_map[0] = 10;
   assert(hex_map.bit(hex_map[1]) == 1, "Expected value of 1, actually "..tostring(hex_map:bit(hex_map[1])))
@@ -145,7 +146,7 @@ end
 
 function Test_Bit_Count()
   print("\n\nTest_Bit_Count")
-  local hex_map = Setup_Hex_Map(36, 8)
+  local hex_map = Setup_Hex_Map(36, 6, 8)
   hex_map[1] = 1; hex_map[2] = 2; hex_map[3] = 3; hex_map[4] = 4; hex_map[5] = 5;
   hex_map[6] = 6; hex_map[7] = 8; hex_map[8] = 7; hex_map[9] = 9; hex_map[0] = 10;
   assert(hex_map.bit_count(hex_map[1]) == 1, "Expected value of 1, actually "..tostring(hex_map:bit_count(hex_map[1])))
@@ -158,7 +159,7 @@ end
 
 function Test_Circle_Placement()
   print("\n\nTest_Circle_Placement")
-  local hex_map = Setup_Hex_Map(100, 8)
+  local hex_map = Setup_Hex_Map(100, 10, 8)
   hex_map:map(function (x) return 0 end)
   local idx = 0
   local found = 0
@@ -169,7 +170,7 @@ function Test_Circle_Placement()
     idx = idx + 1
     return 2^((idx-1)%120)
   end)
-  Even_PPPrint(hex_map, 6)
+  Even_PPPrint(hex_map, 10)
   -- hex_map:foreach(
   --   function (i, x)
   --     if i % 10 == 0 then io.write('\n') end
@@ -181,7 +182,7 @@ end
 
 function Test_HexMapHelper_function()
   print("\n\nTest_HexMapHelper_function")
-  local hex_map = Setup_Hex_Map(36, 8)
+  local hex_map = Setup_Hex_Map(64, 8, 8)
   hex_map:map(function (x) return 0 end)
   local idx = 0
   local found1 = 0
@@ -197,26 +198,28 @@ function Test_HexMapHelper_function()
   local foundULCorner = 0
   local foundLRCorner = 0
   local foundULCorner2 = 0
+  local foundULCorner3 = 0
   hex_map:gen(
   function (hx, x, newWave, dist, cir)
     idx = idx + 1
-    -- if hx(-1,0) == 1 then found1 = idx end
-    -- if hx(0,-1) == 2 then found2 = idx end
-    -- if hx(1,-1) == 2^26 then found3 = idx end
-    -- if hx(1,0) == 2^4 then found4 = idx end
-    -- if hx(0,1) == 2 then found5 = idx end
-    -- if hx(-1,1) == 2 then found6 = idx end
-    -- if hx(-5,0) == 2^3 then foundXLoopLeft = idx end
-    -- if hx(-5,0) == 2^6 then foundXLoopRight = idx end
-    -- if hx(0,-5) == 2^9 then foundYLoopUp = idx end
-    -- if hx(0,5) == 2^3 then foundYLoopDown = idx end
-    -- if hx(0,-10) == 2^3 then foundULCorner = idx end
-    -- if hx(0,10) == 1 then foundLRCorner = idx end
-    -- if hx(0,-9) == 2^5 then foundULCorner2 = idx end
+    if hx(-1,0) == 1 then found1 = idx end
+    if hx(0,-1) == 2 then found2 = idx end
+    if hx(1,-1) == 2^4 then found3 = idx end
+    if hx(1,0) == 2^5 then found4 = idx end
+    if hx(0,1) == 2^3 then found5 = idx end
+    if hx(-1,1) == 2^3 then found6 = idx end
+    if hx(-5,0) == 2^8 then foundXLoopLeft = idx end
+    if hx(5,0) == 2^6 then foundXLoopRight = idx end
+    if hx(0,-5) == 2^11 then foundYLoopUp = idx end
+    if hx(0,5) == 2^7 then foundYLoopDown = idx end
+    if hx(0,-5) == 2^21 then foundULCorner = idx end
+    if hx(0,5) == 2^5 then foundLRCorner = idx end
+    if hx(0,-9) == 2^9 then foundULCorner2 = idx end
+    if hx(0,-10) == 2^9 then foundULCorner3 = idx end
     -- io.write('['..idx..': '..hex_map.bit(hx(-1,0))..'], ')  -- ### DEBUG
     return 2^((idx-1)%120)
   end)
-  Even_PPPrint(hex_map, 6)
+  Even_PPPrint(hex_map, 8)
   -- PPPrint(hex_map)
   -- hex_map:foreach(
   --   function (i, x)
@@ -225,19 +228,21 @@ function Test_HexMapHelper_function()
   --     else io.write('.\t') end
   --   end)
   -- print()
-  -- assert(found1 == 3, "Expected value of 3, actually "..tostring(found1))
-  -- assert(found2 == 3, "Expected value of 3, actually "..tostring(found2))
-  -- assert(found3 == 33, "Expected value of 33, actually "..tostring(found3))
-  -- assert(found4 == 21, "Expected value of 21, actually "..tostring(found4))
-  -- assert(found5 == 7, "Expected value of 7, actually "..tostring(found5))
-  -- assert(found6 == 8, "Expected value of 8, actually "..tostring(found6))
-  -- assert(foundXLoopLeft == 35, "Expected value of 35, actually "..tostring(foundXLoopLeft))
-  -- assert(foundXLoopRight == 22, "Expected value of 22, actually "..tostring(foundXLoopRight))
-  -- assert(foundYLoopUp == 13, "Expected value of 13, actually "..tostring(foundYLoopUp))
-  -- assert(foundYLoopDown == 20, "Expected value of 20, actually "..tostring(foundYLoopDown))
-  -- assert(foundULCorner == 35, "Expected value of 35, actually "..tostring(foundULCorner))
-  -- assert(foundLRCorner == 5, "Expected value of 5, actually "..tostring(foundLRCorner))
-  -- assert(foundULCorner2 == 7, "Expected value of 34, actually "..tostring(foundULCorner2))
+  assert(found1 == 5, "Expected value of 5, actually "..tostring(found1))
+  assert(found2 == 7, "Expected value of 7, actually "..tostring(found2))
+  assert(found3 == 6, "Expected value of 6, actually "..tostring(found3))
+  assert(found4 == 7, "Expected value of 7, actually "..tostring(found4))
+  assert(found5 == 11, "Expected value of 11, actually "..tostring(found5))
+  assert(found6 == 12, "Expected value of 12, actually "..tostring(found6))
+  assert(foundXLoopLeft == 49, "Expected value of 49, actually "..tostring(foundXLoopLeft))
+  assert(foundXLoopRight == 30, "Expected value of 30, actually "..tostring(foundXLoopRight))
+  assert(foundYLoopUp == 62, "Expected value of 62, actually "..tostring(foundYLoopUp))
+  assert(foundYLoopDown == 62, "Expected value of 62, actually "..tostring(foundYLoopDown))
+  assert(foundULCorner == 33, "Expected value of 33, actually "..tostring(foundULCorner))
+  assert(foundLRCorner == 42, "Expected value of 42, actually "..tostring(foundLRCorner))
+  assert(foundULCorner2 == 49, "Expected value of 49, actually "..tostring(foundULCorner2))
+  -- TODO Looping more than once causes issues
+  -- assert(foundULCorner3 == 38, "Expected value of 38, actually "..tostring(foundULCorner3))
 end
 
 function Test_Circle()
@@ -298,7 +303,7 @@ end
 
 function Test_Circle_Any()
   print("\n\nTest_Circle_Any")
-  local hex_map = Setup_Hex_Map(100, 8)
+  local hex_map = Setup_Hex_Map(100, 10, 8)
   hex_map:map(function (x) return 0 end)
   local idx = 0
   local foundAny1 = 0
@@ -323,7 +328,7 @@ function Test_Circle_Any()
     end) then foundAny3 = foundAny3 + 1 end
     return 4
   end)
-  Even_PPPrint(hex_map, 6)
+  Even_PPPrint(hex_map, 10)
   -- PPPrint(hex_map)
   print("foundAny1 = "..foundAny1)  -- ### DEBUG
   assert(foundAny1 == 5, "Expected value of 5, actually "..tostring(foundAny1))
@@ -335,7 +340,7 @@ end
 
 function Test_Circle_All()
   print("\n\nTest_Circle_All")
-  local hex_map = Setup_Hex_Map(100, 8)
+  local hex_map = Setup_Hex_Map(100, 10, 8)
   hex_map:map(function (x) return 0 end)
   local idx = 0
   local foundAll1 = 0
@@ -356,7 +361,7 @@ end
 
 function Test_Gen_NewWave_Selection()
   print("\n\nTest_Gen_NewWave_Selection")
-  local hex_map = Setup_Hex_Map(80, 8)
+  local hex_map = Setup_Hex_Map(80, 10, 8)
   hex_map:map(function (x) return 0 end)
   local calls = 0
   hex_map:gen(function (hx, x, newWave, dist)
@@ -367,7 +372,7 @@ function Test_Gen_NewWave_Selection()
     end
     return x
   end)
-  Even_PPPrint(hex_map, 6)
+  Even_PPPrint(hex_map, 10)
   -- hex_map:pprint()
   assert(hex_map[34] == -2, "Expected value of -2, actually "..tostring(hex_map[34]))
   assert(hex_map[22] == -3, "Expected value of -3, actually "..tostring(hex_map[22]))
