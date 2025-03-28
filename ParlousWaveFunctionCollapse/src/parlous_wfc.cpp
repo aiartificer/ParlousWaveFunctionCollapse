@@ -557,7 +557,7 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
 
         // Apply rules to adjacent points
         for (lua_Integer al = 0; al < buffer_size; al++) {
-            printf("\n  +-------<l = %li>----------\t[%li]", circleBuffer[al], al);  // ### DEBUG
+            printf("\n  +-------<l = %li>----------\t[%li]", circleBuffer[al], al+2);  // ### DEBUG
             updateDomainAtPoint(L, length, width, hexMap, circleBuffer[al], false);}
     }
     lua_pop(L, 2);                                  // [-2, +0, -]

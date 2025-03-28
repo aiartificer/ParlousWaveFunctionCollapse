@@ -244,7 +244,7 @@ end
 function Test_Circle()
   print("\n\nTest_Circle")
   print("----------------------------------------")
-  local WIDTH = 6 -- 12 -- 20
+  local WIDTH = 8 -- 12 -- 20
 
   -- Initialize hex_map
   local hex_map = parlous_wfc.new_hex_map(WIDTH*WIDTH, 8, WIDTH, 5, 17)
@@ -280,9 +280,9 @@ function Test_Circle()
     if cir(2):any(Look_for_8) then return 2 end
     io.write('|3| ')  -- ### DEBUG
     if cir(3):any(Look_for_8) then return 4 end
-    io.write('|4| ')  -- ### DEBUG
+    io.write('\n --\t|4| ')  -- ### DEBUG
     if cir(4):any(Look_for_8) then return 8 end
-    io.write('|5| ')  -- ### DEBUG
+    io.write('\n --\t|5| ')  -- ### DEBUG
     if cir(5):any(Look_for_8) then return 16 end
     return 32
   end)
