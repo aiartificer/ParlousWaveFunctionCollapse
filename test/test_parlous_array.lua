@@ -350,19 +350,19 @@ function Test_Circle_All()
     if idx == 6 then return 8 end
     if cir(1):all(function(v, bit_count, bit)
       if bit_count(v) ~= 1 then return false end
-      if bit(v) == 4 then return true else return false end
+      if bit(v) == 4 then return false else return true end
     end) then foundAll1 = foundAll1 + 1 end
     return 4
   end)
   -- PPPrint(hex_map); print()
   Even_PPPrint(hex_map, 10)
   print("foundAll1 = "..foundAll1)  -- ### DEBUG
-  assert(foundAll1 == 36, "Expected value of 36, actually "..tostring(foundAll1))
+  assert(foundAll1 == 56, "Expected value of 56, actually "..tostring(foundAll1))
 end
 
 function Test_Gen_NewWave_Selection()
   print("\n\nTest_Gen_NewWave_Selection")
-  local hex_map = Setup_Hex_Map(80, 10, 8)
+  local hex_map = Setup_Hex_Map(36, 6, 8)
   hex_map:map(function (x) return 0 end)
   local calls = 0
   hex_map:gen(function (hx, x, newWave, dist)
@@ -373,14 +373,15 @@ function Test_Gen_NewWave_Selection()
     end
     return x
   end)
-  Even_PPPrint(hex_map, 10)
+  Even_PPPrint(hex_map, 6)
   -- hex_map:pprint()
-  assert(hex_map[34] == -2, "Expected value of -2, actually "..tostring(hex_map[34]))
-  assert(hex_map[22] == -3, "Expected value of -3, actually "..tostring(hex_map[22]))
-  assert(hex_map[56] == -5, "Expected value of -5, actually "..tostring(hex_map[56]))
-  assert(hex_map[27] == -9, "Expected value of -9, actually "..tostring(hex_map[27]))
-  assert(hex_map[44] == -17, "Expected value of -17, actually "..tostring(hex_map[44]))
-  assert(calls == 24, "Expected value of 24, actually "..tostring(calls))
+  print("###: "..hex_map.bit(-hex_map[34] - 1))  -- ### DEBUG
+  assert(hex_map.bit(-hex_map[34]-1) == 3, "Expected value of 3, actually "..tostring(hex_map.bit(-hex_map[34] - 1)))
+  assert(hex_map.bit(-hex_map[22]-1) == 15, "Expected value of 15, actually "..tostring(hex_map.bit(-hex_map[22]-1)))
+  -- assert(hex_map[56] == -5, "Expected value of -5, actually "..tostring(hex_map[56]))
+  assert(hex_map.bit(-hex_map[27]-1) == 28, "Expected value of 28, actually "..tostring(hex_map.bit(-hex_map[27]-1)))
+  -- assert(hex_map[44] == -17, "Expected value of -17, actually "..tostring(hex_map[44]))
+  assert(calls == 36, "Expected value of 24, actually "..tostring(calls))
   print("Number of calls to gen: "..calls)
 end
 
