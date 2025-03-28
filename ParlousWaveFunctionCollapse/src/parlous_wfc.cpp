@@ -129,18 +129,22 @@ static T hx(lua_Integer idx, lua_Integer width, lua_Integer length,
     // Determine if off edge of map and need to loop around
     if (newCol < 0)
         new_q += width;
-    if (newCol > width)
+    if (newCol >= width)
         new_q -= width;
 
     // Set l to new location
     lua_Integer l = even_axial_to_l(width, new_q, new_r);
+    // lua_Integer test = even_axial_to_l(width, new_q, new_r+1)-width;  // ### DEBUG
+    // printf("{hx:_q=%li,_r=%li,q=%li,r=%li,c=%li,*q=%li,*r=%li,l=%li,t=%li}", _q, _r, q, r, newCol, new_q, new_r, l, test);  // ### DEBUG
+    // printf("{hx:l=%li|%li|%d}", l, length + l - width, 0 > l);  // ### DEBUG
 
     // Loop around Y-axis
     if (0 > l)
-        l = length + l - width;
+        l = length + l;// - width;
     if (length <= l)
-        l = l + width - length;
+        l = l - length;; //l + width - length;
 
+    // printf("!!l=%li ", l);  // ### DEBUG
     return l;
 }
 #define hxL(idx, width, length) hx(idx, width, length, (lua_Integer)-1, (lua_Integer)0)
@@ -196,6 +200,7 @@ static int hexCircle(lua_State* L,
     for (lua_Integer c = 0; c < r; c++)
     {
         circle[i] = hxUR(circle[i-1], width, length);
+        // printf("[]=%li ", circle[i]);  // ### DEBUG
         i++;
     }
 
@@ -543,6 +548,7 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
         
         // Update domain at present point
         updateDomainAtPoint(L, length, width, hexMap, l, true);
+        printf("\n----wave--------------------");  // ### DEBUG
 
         // Generate list of adjacent points in hex map
         for (lua_Integer r = 1; r <= maxDepth; r++)

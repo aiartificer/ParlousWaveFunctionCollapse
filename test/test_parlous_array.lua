@@ -201,19 +201,19 @@ function Test_HexMapHelper_function()
   hex_map:gen(
   function (hx, x, newWave, dist, cir)
     idx = idx + 1
-    if hx(-1,0) == 1 then found1 = idx end
-    if hx(0,-1) == 2 then found2 = idx end
-    if hx(1,-1) == 2^26 then found3 = idx end
-    if hx(1,0) == 2^4 then found4 = idx end
-    if hx(0,1) == 2 then found5 = idx end
-    if hx(-1,1) == 2 then found6 = idx end
-    if hx(-5,0) == 2^3 then foundXLoopLeft = idx end
-    if hx(-5,0) == 2^6 then foundXLoopRight = idx end
-    if hx(0,-5) == 2^9 then foundYLoopUp = idx end
-    if hx(0,5) == 2^3 then foundYLoopDown = idx end
-    if hx(0,-10) == 2^3 then foundULCorner = idx end
-    if hx(0,10) == 1 then foundLRCorner = idx end
-    if hx(0,-9) == 2^5 then foundULCorner2 = idx end
+    -- if hx(-1,0) == 1 then found1 = idx end
+    -- if hx(0,-1) == 2 then found2 = idx end
+    -- if hx(1,-1) == 2^26 then found3 = idx end
+    -- if hx(1,0) == 2^4 then found4 = idx end
+    -- if hx(0,1) == 2 then found5 = idx end
+    -- if hx(-1,1) == 2 then found6 = idx end
+    -- if hx(-5,0) == 2^3 then foundXLoopLeft = idx end
+    -- if hx(-5,0) == 2^6 then foundXLoopRight = idx end
+    -- if hx(0,-5) == 2^9 then foundYLoopUp = idx end
+    -- if hx(0,5) == 2^3 then foundYLoopDown = idx end
+    -- if hx(0,-10) == 2^3 then foundULCorner = idx end
+    -- if hx(0,10) == 1 then foundLRCorner = idx end
+    -- if hx(0,-9) == 2^5 then foundULCorner2 = idx end
     -- io.write('['..idx..': '..hex_map.bit(hx(-1,0))..'], ')  -- ### DEBUG
     return 2^((idx-1)%120)
   end)
