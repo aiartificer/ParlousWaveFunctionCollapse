@@ -36,3 +36,6 @@
 
 # Generated Files
 parlous_wfc
+/.editor_settings
+/.internal
+/build

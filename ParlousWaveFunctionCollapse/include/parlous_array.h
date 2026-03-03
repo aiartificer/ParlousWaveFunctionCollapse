@@ -39,14 +39,14 @@ static int pprintMap(lua_State* L)
                 printf(" %lu", v != 0 ? ~v : 0);
             }
         #else
-            if (i < 10 && i%2 == 0) printf("map[%llu][:]:  ", i);
-            else if (i < 10 && i%2 == 1) printf("map[%llu][:]: ", i);
-            else if (i%2 == 0) printf("map[%llu][:]: ", i);
-            else printf("map[%llu][:]:", i);
+            if (i < 10 && i%2 == 0) printf("map[%lu][:]:  ", i);
+            else if (i < 10 && i%2 == 1) printf("map[%lu][:]: ", i);
+            else if (i%2 == 0) printf("map[%lu][:]: ", i);
+            else printf("map[%lu][:]:", i);
             for (lua_Integer j = 0; j < width; j++)
             {
                 lua_Integer v = hexMap[j + width*i];
-                printf(" %llu", v != 0 ? ~v : 0);
+                printf(" %lu", v != 0 ? ~v : 0);
             }
         #endif // IN_DEFOLD
         printf("\n");

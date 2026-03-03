@@ -190,7 +190,7 @@ static int hexCircle(lua_State* L,
                      lua_Integer hexCircleLen)
 {
     if (hexCircleLen < 6*r)
-        return luaL_error(L, "Size allocated for hexCircle too small: need=%d, allocated=%d)", 6*r, hexCircleLen);\
+        return luaL_error(L, "Size allocated for hexCircle too small: need=%ld, allocated=%ld)", 6*r, hexCircleLen);\
     
     // Start directly left of point
     size_t i = 0;
