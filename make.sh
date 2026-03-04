@@ -1,2 +1,2 @@
-g++ -Iinclude -I../lua-5.1.5/src -I ParlousWaveFunctionCollapse/include -L../lua-5.1.5/src -c ParlousWaveFunctionCollapse/include/parlous_array.h -O -Wall -o ParlousWaveFunctionCollapse/lib/linux/parlous_array.o -llua -fPIC
+g++ -Iinclude -I../lua-5.1.5/src -I ../defoldsdk/sdk/include/ -I ParlousWaveFunctionCollapse/include -L../lua-5.1.5/src -c ParlousWaveFunctionCollapse/include/parlous_array.h -O -Wall -o ParlousWaveFunctionCollapse/lib/linux/parlous_array.o -llua -fPIC
 g++ -Iinclude -I../lua-5.1.5/src -I ParlousWaveFunctionCollapse/include -L../lua-5.1.5/src -L ParlousWaveFunctionCollapse/lib/linux test/test.cpp ParlousWaveFunctionCollapse/src/parlous_wfc.cpp -O -Wall -o parlous_wfc -llua
