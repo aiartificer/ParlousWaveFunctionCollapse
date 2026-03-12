@@ -124,7 +124,7 @@ static T hx(lua_Integer idx, lua_Integer width, lua_Integer length,
     lua_Integer _q = X(idx, width) - (_r + (_r&1))/2;
     lua_Integer new_q = _q + q;
     lua_Integer new_r = _r + r;
-    lua_Integer newCol = evenAxialCol(new_q, new_r);
+    lua_Integer newCol = new_q; // evenAxialCol(new_q, new_r);
 
     // Determine if off edge of map and need to loop around
     if (newCol < 0)

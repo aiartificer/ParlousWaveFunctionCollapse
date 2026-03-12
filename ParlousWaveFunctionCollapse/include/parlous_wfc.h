@@ -1,6 +1,8 @@
 #ifndef PARLOUS_WFC_H_INCLUDED
 #define PARLOUS_WFC_H_INCLUDED
 
+#define DLIB_LOG_DOMAIN "ParlousArray"
+
 #define REGION_SIZE 0
 
 #include "indefold.h"
@@ -25,7 +27,8 @@ extern "C"{
 #define col(l,c) (l%c)
 #define evenAxialCol(q,r) (q + (r + (r&1))/2)
 #define oddAxialCol(q,r) (q - (r + (r&1))/2)
-#define even_axial_to_l(w, q, r) (q + (r + ((r)&1))/2 + (w)*(r))
+//#define even_axial_to_l(w, q, r) (q + (r + ((r)&1))/2 + (w)*(r))
+#define even_axial_to_l(w, q, r) (q + (w)*(r))
 
 
 void LuaInitHexMap(lua_State* L);
