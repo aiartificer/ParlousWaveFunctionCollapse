@@ -202,12 +202,12 @@ function Test_HexMapHelper_function()
   hex_map:gen(
   function (hx, x, newWave, dist, cir)
     idx = idx + 1
-    if hx(-1,0) == 1 then found1 = idx end
-    if hx(0,-1) == 2 then found2 = idx end
-    if hx(1,-1) == 2^4 then found3 = idx end
-    if hx(1,0) == 2^5 then found4 = idx end
-    if hx(0,1) == 2^3 then found5 = idx end
-    if hx(-1,1) == 2^3 then found6 = idx end
+    if hx(-1,0) == 1 then found1 = idx end            -- left
+    if hx(0,-1) == 2 then found2 = idx end            -- up left
+    if hx(1,-1) == 2^32 then found3 = idx end         -- up right
+    if hx(1,0) == 2^19 then found4 = idx end          -- right
+    if hx(0,1) == 2^3 then found5 = idx end           -- down right
+    if hx(-1,1) == 2^25 then found6 = idx end         -- down left
     if hx(-5,0) == 2^8 then foundXLoopLeft = idx end
     if hx(5,0) == 2^6 then foundXLoopRight = idx end
     if hx(0,-5) == 2^11 then foundYLoopUp = idx end
@@ -230,10 +230,10 @@ function Test_HexMapHelper_function()
   -- print()
   assert(found1 == 5, "Expected value of 5, actually "..tostring(found1))
   assert(found2 == 7, "Expected value of 7, actually "..tostring(found2))
-  assert(found3 == 6, "Expected value of 6, actually "..tostring(found3))
-  assert(found4 == 7, "Expected value of 7, actually "..tostring(found4))
+  assert(found3 == 44, "Expected value of 44, actually "..tostring(found3))
+  assert(found4 == 38, "Expected value of 38, actually "..tostring(found4))
   assert(found5 == 11, "Expected value of 11, actually "..tostring(found5))
-  assert(found6 == 12, "Expected value of 12, actually "..tostring(found6))
+  assert(found6 == 46, "Expected value of 46, actually "..tostring(found6))
   assert(foundXLoopLeft == 49, "Expected value of 49, actually "..tostring(foundXLoopLeft))
   assert(foundXLoopRight == 30, "Expected value of 30, actually "..tostring(foundXLoopRight))
   assert(foundYLoopUp == 62, "Expected value of 62, actually "..tostring(foundYLoopUp))

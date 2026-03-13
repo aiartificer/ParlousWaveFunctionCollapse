@@ -121,10 +121,11 @@ static T hx(lua_Integer idx, lua_Integer width, lua_Integer length,
             T q, T r)
 {
     lua_Integer _r = Y(idx, width);
-    lua_Integer _q = X(idx, width) - (_r + (_r&1))/2;
+    // lua_Integer _q = X(idx, width) - (_r + (_r&1))/2;
+    lua_Integer _q = X(idx, width) - ((_r+1)>>1);
     lua_Integer new_q = _q + q;
     lua_Integer new_r = _r + r;
-    lua_Integer newCol = new_q; // evenAxialCol(new_q, new_r);
+    lua_Integer newCol = evenAxialCol(new_q, new_r);
 
     // Determine if off edge of map and need to loop around
     if (newCol < 0)
@@ -144,7 +145,7 @@ static T hx(lua_Integer idx, lua_Integer width, lua_Integer length,
     if (length <= l)
         l = l - length;; //l + width - length;
 
-    // printf("!!l=%li ", l);  // ### DEBUG
+    // printf("!!l=%li (o=%li)", l, idx);  // ### DEBUG
     return l;
 }
 #define hxL(idx, width, length) hx(idx, width, length, (lua_Integer)-1, (lua_Integer)0)

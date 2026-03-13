@@ -20,15 +20,19 @@ extern "C"{
 
 #define MODULE_NAME "parlous_wfc"
 
+// Using even-r offset (first row shifted right of second row)
 #define Y(l,c) (l/c)
 #define row(l,c) (l/c)
 #define axialRow(q,r) (r)
 #define X(l,c) (l%c)
 #define col(l,c) (l%c)
-#define evenAxialCol(q,r) (q + (r + (r&1))/2)
-#define oddAxialCol(q,r) (q - (r + (r&1))/2)
-//#define even_axial_to_l(w, q, r) (q + (r + ((r)&1))/2 + (w)*(r))
-#define even_axial_to_l(w, q, r) (q + (w)*(r))
+#define evenAxialCol(q,r) (q + ((r+1)>>1))
+// #define oddAxialCol(q,r) (q - (r + (r&1))/2)
+#define even_axial_to_l(w, q, r) (q + ((r+1)>>1) + (w)*(r))
+// #define evenAxialCol(q,r) (q + (r + (r&1))/2)
+// #define oddAxialCol(q,r) (q - (r + (r&1))/2)
+// #define even_axial_to_l(w, q, r) (q + (r + ((r)&1))/2 + (w)*(r))
+// #define even_axial_to_l(w, q, r) (q + (w)*(r))
 
 
 void LuaInitHexMap(lua_State* L);
