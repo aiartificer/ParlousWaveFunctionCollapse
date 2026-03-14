@@ -60,7 +60,7 @@ function Test_Parlous_WFC_Gen()
   local hex_map = Setup_Hex_Map(80, 10, 8)
   hex_map:map(function (x) return 0 end)
   local calls = 0
-  hex_map:gen(function (hx, x, newWave, dist)
+  hex_map:gen(function (hx, x, l, newWave, dist)
     -- print("### ["..calls.."]: "..tostring(newWave))  -- ### DEBUG
     -- print("### ["..calls.."]:\tx = "..x)  -- ### DEBUG
     -- hx(0,1)  -- ### DEBUG
@@ -166,7 +166,7 @@ function Test_Circle_Placement()
   local foundAny = 0
   local foundAll = 0
   hex_map:gen(
-  function (hx, x, newWave, dist, cir)
+  function (hx, x, l, newWave, dist, cir)
     idx = idx + 1
     return 2^((idx-1)%120)
   end)
@@ -200,7 +200,7 @@ function Test_HexMapHelper_function()
   local foundULCorner2 = 0
   local foundULCorner3 = 0
   hex_map:gen(
-  function (hx, x, newWave, dist, cir)
+  function (hx, x, l, newWave, dist, cir)
     idx = idx + 1
     if hx(-1,0) == 1 then found1 = idx end            -- left
     if hx(0,-1) == 2 then found2 = idx end            -- up left
@@ -274,7 +274,7 @@ function Test_Circle()
   idx = 0
   local repeats = 0
   hex_map:gen(
-  function (hx, x, newWave, dist, cir)
+  function (hx, x, l, newWave, dist, cir)
     idx = idx + 1
     -- io.write('\n### ['..(idx)..']: ')  -- ### DEBUG
     if hex_map.bit_count(x) == 1 then repeats = repeats + 1 end
@@ -309,7 +309,7 @@ function Test_Circle_Any()
   local foundAny1 = 0
   local foundAny2 = 0
   local foundAny3 = 0
-  hex_map:gen(function (hx, x, newWave, dist, cir)
+  hex_map:gen(function (hx, x, l, newWave, dist, cir)
     idx = idx + 1
     if idx == 6 then return 8 end
     if cir(1):any(function(v, bit_count, bit)
@@ -345,7 +345,7 @@ function Test_Circle_All()
   local idx = 0
   local foundAll1 = 0
   local foundAll2 = 0
-  hex_map:gen(function (hx, x, newWave, dist, cir)
+  hex_map:gen(function (hx, x, l, newWave, dist, cir)
     idx = idx + 1
     if idx == 6 then return 8 end
     if cir(1):all(function(v, bit_count, bit)
@@ -365,7 +365,7 @@ function Test_Gen_NewWave_Selection()
   local hex_map = Setup_Hex_Map(36, 6, 8)
   hex_map:map(function (x) return 0 end)
   local calls = 0
-  hex_map:gen(function (hx, x, newWave, dist)
+  hex_map:gen(function (hx, x, l, newWave, dist)
     if (newWave)
     then
       calls = calls + 1;
@@ -391,7 +391,7 @@ function Test_Parlous_WFC_Gen_Time()
   hex_map:map(function (x) return 0 end)
   local calls = 0
   local start_time = os.time()
-  hex_map:gen(function (hx, x, newWave, dist)
+  hex_map:gen(function (hx, x, l, newWave, dist)
     calls = calls + 1;
     if (newWave) then return 16 end
     if hex_map:mask(1, hx(0, -1)) == 1 then return 2^1 end

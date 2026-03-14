@@ -467,6 +467,9 @@ static int __updateDomainCall(lua_State* L,       //// [-0, +0, m]
     // printf("!!!{%lu}!!!  ", l);  // ### DEBUG
     lua_pushnumber(L, ~(T)hexMap[l]);               // [-0, +1, -]
 
+    // Add map index as parameter
+    lua_pushinteger(L, l);                          // [-0, +1, -]
+
     // Add new wave flag parameter
     lua_pushboolean(L, newWave);                    // [-0, +1, -]
 
@@ -480,10 +483,10 @@ static int __updateDomainCall(lua_State* L,       //// [-0, +0, m]
     lua_pushinteger(L, width);                      // [-0, +1, -]
     lua_pushinteger(L, length);                     // [-0, +1, -]
     lua_pushinteger(L, l);                          // [-0, +1, -]
-    lua_pushcclosure(L, getCircle<T>, 4);           // [-3, +1, -]
+    lua_pushcclosure(L, getCircle<T>, 4);           // [-4, +1, -]
 
     // Call the function and apply result to hex map
-    lua_call(L, 5, 1);                              // [-6, +1, e]
+    lua_call(L, 6, 1);                              // [-7, +1, e]
     T result = (T)luaL_checknumber(L, -1);
     hexMap[l] = ~result;
     lua_pop(L, 1);                                  // [-1, +0, -]
