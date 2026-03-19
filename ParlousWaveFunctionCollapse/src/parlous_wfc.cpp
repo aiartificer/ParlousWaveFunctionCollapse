@@ -490,6 +490,7 @@ static int __updateDomainCall(lua_State* L,       //// [-0, +0, m]
     lua_call(L, 6, 1);                              // [-7, +1, e]
     T result = (T)luaL_checknumber(L, -1);
     hexMap[l] = ~result;
+    print("###@@@ hexMap[%li] = %li", l, hexMap[l]);  // ### DEBUG
     lua_pop(L, 1);                                  // [-1, +0, -]
 
     return 0;
