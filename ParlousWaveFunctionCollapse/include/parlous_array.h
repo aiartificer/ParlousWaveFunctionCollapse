@@ -122,6 +122,7 @@ static int map(lua_State* L)                      //// [-0, +0, m]
     // Setup loop
     for (lua_Integer i = 0; i < length; i++)
     {
+        if (arr[i] < -64) printf("###@@@ arr[%li] is %li\n", i, arr[i]);  // ### DEBUG
         lua_pushnumber(L, (T)arr[i]);               // [-0, +1, -]
         lua_call(L, 1, 1);                          // [-2, +1, e]
         T result = (T)luaL_checknumber(L, -1);
