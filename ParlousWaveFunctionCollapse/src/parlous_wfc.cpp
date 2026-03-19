@@ -491,6 +491,7 @@ static int __updateDomainCall(lua_State* L,       //// [-0, +0, m]
     T result = (T)luaL_checknumber(L, -1);
     hexMap[l] = ~result;
     // printf("###@@@ hexMap[%li] = %li\n", l, hexMap[l]);  // ### DEBUG
+    if (hexMap[l] == -261) printf("###@@@ hexMap[%li] = %li\n", l, hexMap[l]);  // ### DEBUG
     lua_pop(L, 1);                                  // [-1, +0, -]
 
     return 0;
