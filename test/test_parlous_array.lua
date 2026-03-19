@@ -343,21 +343,22 @@ function Test_Circle_All()
   local hex_map = Setup_Hex_Map(100, 10, 8)
   hex_map:map(function (x) return 0 end)
   local idx = 0
-  local foundAll1 = 0
+  local foundAll = 0
   local foundAll2 = 0
   hex_map:gen(function (hx, x, l, newWave, dist, cir)
     idx = idx + 1
-    if idx == 6 then return 8 end
+    print("idx = "..idx) -- ### DEBUG
+    if idx == 1 then return 8 end
     if cir(1):all(function(v, bit_count, bit)
-      if bit_count(v) ~= 1 then return false end
+      print("v = "..v.."\tbit(v) = "..bit(v))  -- ### DEBUG
       if bit(v) == 4 then return false else return true end
-    end) then foundAll1 = foundAll1 + 1 end
+    end) then foundAll = foundAll + 1 end
     return 4
   end)
   -- PPPrint(hex_map); print()
   Even_PPPrint(hex_map, 10)
-  print("foundAll1 = "..foundAll1)  -- ### DEBUG
-  assert(foundAll1 == 56, "Expected value of 56, actually "..tostring(foundAll1))
+  print("foundAll = "..foundAll)  -- ### DEBUG
+  assert(foundAll == 93, "Expected value of 93, actually "..tostring(foundAll))
 end
 
 function Test_Gen_NewWave_Selection()

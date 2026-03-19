@@ -316,6 +316,7 @@ static int circleAll(lua_State* L)                //// [-0, +1, m]
     lua_pushvalue(L, -1);                           // [-0, +1, -]
 
     // Search for value and flag if found
+    int allMatch = 1;
     int returnVal = 1;
     for (lua_Integer i = 0; i < circleLength; i++)
     {
@@ -343,12 +344,12 @@ static int circleAll(lua_State* L)                //// [-0, +1, m]
         lua_pushvalue(L, -1);                       // [-0, +1, -]
 
         // Flag if any matches found
-        if (!returnVal) returnVal = 0;
+        if (!returnVal) allMatch = 0;
     }
 
     // Pop duplicate function and push return value
     lua_pop(L, 1);                                  // [-1, +0, -]
-    lua_pushboolean(L, returnVal);                  // [-0, +1, -]
+    lua_pushboolean(L, allMatch);                   // [-0, +1, -]
 
     // Return 1 items
     return 1;
@@ -548,7 +549,11 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
         // printf("\n----------<l = %li>----------", l);  // ### DEBUG
 
         // Check if cell has already completely collapsed the wave
-        if (hexMap[l] != 0 && __countBits(~hexMap[l]) == 1) continue;
+        lua_Integer ter_id = hexMap[l] >> 8;
+        lua_Integer ter_type = hexMap[l] & 255;
+        // if (hexMap[l] != 0 && __countBits(~hexMap[l]) == 1) continue;
+        if (hexMap[l] != 0 && __countBits(ter_id) == 1 && __countBits(ter_type) == 1)
+            continue;
         
         // Update domain at present point
         updateDomainAtPoint(L, length, width, hexMap, l, true);
