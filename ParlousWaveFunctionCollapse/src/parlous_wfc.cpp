@@ -553,7 +553,7 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
         // Check if cell has already completely collapsed the wave
         lua_Integer ter_id = hexMap[l] >> 8;
         lua_Integer ter_type = hexMap[l] & 255;
-        if (l == 119) printf("###))> arr[119] is %li\n", hexMap[119]);  // ### DEBUG
+        if (l == 119) printf("###))> arr[119] is %li\n###))> ter_id: %li, ter_type: %li", hexMap[119], ter_id, ter_type);  // ### DEBUG
         // if (hexMap[l] != 0 && __countBits(~hexMap[l]) == 1) continue;
         if (hexMap[l] != 0 && __countBits(ter_id) == 1 && __countBits(ter_type) == 1) {
             if (hexMap[l] == -261) printf("###### hexMap[%li] is 260\n", l);  // ### DEBUG
