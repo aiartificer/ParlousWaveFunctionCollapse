@@ -491,7 +491,7 @@ static int __updateDomainCall(lua_State* L,       //// [-0, +0, m]
     T result = (T)luaL_checknumber(L, -1);
     hexMap[l] = ~result;
     // printf("###@@@ hexMap[%li] = %li\n", l, hexMap[l]);  // ### DEBUG
-    if (hexMap[l] == -261) printf("###@@@ hexMap[%li] = %li\n", l, hexMap[l]);  // ### DEBUG
+    if (l == 119) printf("###@@@ hexMap[%li] = %li\n", l, hexMap[l]);  // ### DEBUG
     lua_pop(L, 1);                                  // [-1, +0, -]
 
     return 0;
@@ -559,7 +559,7 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
             if (hexMap[l] == -261) printf("###### hexMap[%li] is 260\n", l);  // ### DEBUG
             continue;
         }
-        if (l == 119) printf("###))> arr[119] is STILL %li\n", hexMap[119]);  // ### DEBUG
+        if (l == 119) printf("###))> arr[119] is CHANGING FROM %li\n", hexMap[119]);  // ### DEBUG
         
         // Update domain at present point
         updateDomainAtPoint(L, length, width, hexMap, l, true);
