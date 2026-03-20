@@ -576,8 +576,10 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
             ter_type = ~hexMap[al] & 255;
             if (hexMap[al] != 0 && __countBits(ter_id) == 1 && __countBits(ter_type) == 1)
                 continue;
+            if (l == 119) printf("###>)> arr[119] is CHANGING FROM %li\n", hexMap[119]);  // ### DEBUG
             // printf("\n  +-------<l = %li>----------\t[%li]", circleBuffer[al], al+2);  // ### DEBUG
-            updateDomainAtPoint(L, length, width, hexMap, circleBuffer[al], false);}
+            updateDomainAtPoint(L, length, width, hexMap, circleBuffer[al], false);
+        }
     }
     lua_pop(L, 2);                                  // [-2, +0, -]
 
