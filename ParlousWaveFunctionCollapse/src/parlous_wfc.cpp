@@ -572,11 +572,11 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
 
         // Apply rules to adjacent points
         for (lua_Integer al = 0; al < buffer_size; al++) {
-            ter_id = ~hexMap[al] >> 8;
-            ter_type = ~hexMap[al] & 255;
-            if (hexMap[al] != 0 && __countBits(ter_id) == 1 && __countBits(ter_type) == 1)
+            ter_id = ~hexMap[circleBuffer[al]] >> 8;
+            ter_type = ~hexMap[circleBuffer[al]] & 255;
+            if (hexMap[circleBuffer[al]] != 0 && __countBits(ter_id) == 1 && __countBits(ter_type) == 1)
                 continue;
-            if (l == 119) printf("###>)> arr[119] is CHANGING FROM %li\n", hexMap[119]);  // ### DEBUG
+            if (circleBuffer[al] == 119) printf("###>)> arr[119] is CHANGING FROM %li\n", hexMap[119]);  // ### DEBUG
             // printf("\n  +-------<l = %li>----------\t[%li]", circleBuffer[al], al+2);  // ### DEBUG
             updateDomainAtPoint(L, length, width, hexMap, circleBuffer[al], false);
         }
