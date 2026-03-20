@@ -491,7 +491,7 @@ static int __updateDomainCall(lua_State* L,       //// [-0, +0, m]
     T result = (T)luaL_checknumber(L, -1);
     hexMap[l] = ~result;
     // printf("###@@@ hexMap[%li] = %li\n", l, hexMap[l]);  // ### DEBUG
-    if (l == 119) printf("###@@@ WAS SET hexMap[%li] = %li\n", l, hexMap[l]);  // ### DEBUG
+    // if (l == 119) printf("###@@@ WAS SET hexMap[%li] = %li\n", l, hexMap[l]);  // ### DEBUG
     lua_pop(L, 1);                                  // [-1, +0, -]
 
     return 0;
@@ -553,13 +553,13 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
         // Check if cell has already completely collapsed the wave
         lua_Integer ter_id = ~hexMap[l] >> 8;
         lua_Integer ter_type = ~hexMap[l] & 255;
-        if (l == 119) printf("###))> arr[119] is %li\n###))> ter_id: %li, ter_type: %li\n", hexMap[119], ter_id, ter_type);  // ### DEBUG
+        // if (l == 119) printf("###))> arr[119] is %li\n###))> ter_id: %li, ter_type: %li\n", hexMap[119], ter_id, ter_type);  // ### DEBUG
         // if (hexMap[l] != 0 && __countBits(~hexMap[l]) == 1) continue;
         if (hexMap[l] != 0 && __countBits(ter_id) == 1 && __countBits(ter_type) == 1) {
-            if (hexMap[l] == -261) printf("###### hexMap[%li] is 260\n", l);  // ### DEBUG
+            // if (hexMap[l] == -261) printf("###### hexMap[%li] is 260\n", l);  // ### DEBUG
             continue;
         }
-        if (l == 119) printf("###))> arr[119] is CHANGING FROM %li\n", hexMap[119]);  // ### DEBUG
+        // if (l == 119) printf("###))> arr[119] is CHANGING FROM %li\n", hexMap[119]);  // ### DEBUG
         
         // Update domain at present point
         updateDomainAtPoint(L, length, width, hexMap, l, true);
@@ -576,7 +576,7 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
             ter_type = ~hexMap[circleBuffer[al]] & 255;
             if (hexMap[circleBuffer[al]] != 0 && __countBits(ter_id) == 1 && __countBits(ter_type) == 1)
                 continue;
-            if (circleBuffer[al] == 119) printf("###>)> arr[119] is CHANGING FROM %li\n", hexMap[119]);  // ### DEBUG
+            // if (circleBuffer[al] == 119) printf("###>)> arr[119] is CHANGING FROM %li\n", hexMap[119]);  // ### DEBUG
             // printf("\n  +-------<l = %li>----------\t[%li]", circleBuffer[al], al+2);  // ### DEBUG
             updateDomainAtPoint(L, length, width, hexMap, circleBuffer[al], false);
         }
