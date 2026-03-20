@@ -555,7 +555,7 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
         lua_Integer ter_type = ~hexMap[l] & 255;
         // if (l == 119) printf("###))> arr[119] is %li\n###))> ter_id: %li, ter_type: %li\n", hexMap[119], ter_id, ter_type);  // ### DEBUG
         // if (hexMap[l] != 0 && __countBits(~hexMap[l]) == 1) continue;
-        if (hexMap[l] != 0 && __countBits(ter_id) == 1 && __countBits(ter_type) == 1) {
+        if (hexMap[l] != 0 && __countBits(ter_id) <= 1 && __countBits(ter_type) == 1) {
             // if (hexMap[l] == -261) printf("###### hexMap[%li] is 260\n", l);  // ### DEBUG
             continue;
         }
@@ -574,7 +574,7 @@ static int gen(lua_State* L)                      //// [-0, +0, m]
         for (lua_Integer al = 0; al < buffer_size; al++) {
             ter_id = ~hexMap[circleBuffer[al]] >> 8;
             ter_type = ~hexMap[circleBuffer[al]] & 255;
-            if (hexMap[circleBuffer[al]] != 0 && __countBits(ter_id) == 1 && __countBits(ter_type) == 1)
+            if (hexMap[circleBuffer[al]] != 0 && __countBits(ter_id) <= 1 && __countBits(ter_type) == 1)
                 continue;
             // if (circleBuffer[al] == 119) printf("###>)> arr[119] is CHANGING FROM %li\n", hexMap[119]);  // ### DEBUG
             // printf("\n  +-------<l = %li>----------\t[%li]", circleBuffer[al], al+2);  // ### DEBUG
